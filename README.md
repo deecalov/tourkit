@@ -8,6 +8,9 @@
 Lightweight, dependency-free product tours and onboarding walkthroughs.
 MIT-licensed, accessible, framework-agnostic.
 
+Visit [sitetour.dev](https://sitetour.dev/) for a live tour and integration examples.
+Try the [interactive playground](https://sitetour.dev/demo/) to explore tours, hints and themes.
+
 - **SVG spotlight** instead of z-index hacks — works inside `transform`/`filter` stacking contexts, never mutates your DOM.
 - **Async targets (SPA-ready)**: steps wait for lazily mounted elements and the spotlight flows to them when they appear (`waitForTarget`); no "element not found" failures.
 - **Interactive steps**: `advanceOn` moves the tour forward when the user clicks the highlighted element; `highlight()` spotlights anything without a tour.
