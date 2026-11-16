@@ -5,8 +5,8 @@ popover with an explanation and a “Got it” button. They live in a separate
 entry so tours-only consumers do not pay for them.
 
 ```ts
-import { createHints } from "tourkit/hints";
-import { de } from "tourkit/locales";
+import { createHints } from "sitetourkit/hints";
+import { de } from "sitetourkit/locales";
 
 const hints = createHints({
   rememberDismissed: { key: "hints:main" }, // dismissed hints stay hidden after reload

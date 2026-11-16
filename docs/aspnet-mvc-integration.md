@@ -85,8 +85,8 @@ tour.on("complete", ({ reason }) => console.log("Onboarding completed:", reason)
 await tour.start();
 ```
 
-Bundler users can import a label set from `tourkit/locales`, for example
-`import { de } from "tourkit/locales"`.
+Bundler users can import a label set from `sitetourkit/locales`, for example
+`import { de } from "sitetourkit/locales"`.
 
 ## 4. Multi-page tours
 

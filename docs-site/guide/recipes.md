@@ -60,7 +60,7 @@ TourKit needs no `unsafe-inline`: geometry is applied through the CSSOM, not
 with a nonce:
 
 ```ts
-import { injectStyles } from "tourkit/inject-styles";
+import { injectStyles } from "sitetourkit/inject-styles";
 injectStyles({ nonce: document.querySelector<HTMLMetaElement>("meta[name=csp-nonce]")?.content });
 ```
 
@@ -147,7 +147,7 @@ leaves the tour running underneath.
 ## Offering "continue where you left off"
 
 ```ts
-import { createTour, getPersistedProgress } from "tourkit";
+import { createTour, getPersistedProgress } from "sitetourkit";
 
 const KEY = "tour:onboarding";
 

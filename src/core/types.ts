@@ -24,7 +24,7 @@ export interface Labels {
   /** Label of the `showOnce` checkbox. */
   dontShowAgain: string;
   /**
-   * Dismiss button of a hint popover (`tourkit/hints`). Optional so existing
+   * Dismiss button of a hint popover (`sitetourkit/hints`). Optional so existing
    * custom label sets keep type-checking; the bundled locales all provide it.
    */
   hintDismiss?: string;

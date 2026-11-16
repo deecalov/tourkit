@@ -84,8 +84,8 @@ These are historical figures. Use current CI output for current counts and budge
 ## 5. Usage
 
 ```ts
-import { createTour } from "tourkit";
-import "tourkit/styles.css";
+import { createTour } from "sitetourkit";
+import "sitetourkit/styles.css";
 
 const tour = createTour({
   progress: true,
@@ -173,4 +173,4 @@ bundle budgets were the next milestones. Later releases implemented these.
 
 The public migration reference is [introjs-migration.md](introjs-migration.md).
 The runtime compatibility adapter was still planned at the v0.1 checkpoint;
-current releases provide `tourkit/compat-introjs`.
+current releases provide `sitetourkit/compat-introjs`.

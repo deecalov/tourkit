@@ -18,8 +18,8 @@ Intro.js.
 ```diff
 - import introJs from "intro.js";
 - import "intro.js/introjs.css";
-+ import { introJs } from "tourkit/compat-introjs";
-+ import "tourkit/styles.css";
++ import { introJs } from "sitetourkit/compat-introjs";
++ import "sitetourkit/styles.css";
 ```
 
 The adapter maps intro.js option names, callbacks, `data-intro*` attributes
@@ -96,4 +96,4 @@ unsubscribe) and may be async.
 - `data-intro*` attributes become `data-tour*`; custom `.introjs-*` CSS
   becomes `--tk-*` variables and `.tk-*` BEM classes.
 - Hints: `introJs.hint()` → [`createHints`](/guide/hints) from
-  `tourkit/hints`.
+  `sitetourkit/hints`.

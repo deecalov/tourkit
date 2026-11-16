@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-npm install tourkit
+npm install sitetourkit
 ```
 
 For script-tag setups use the IIFE build (`dist/index.global.js`, global
@@ -12,8 +12,8 @@ For script-tag setups use the IIFE build (`dist/index.global.js`, global
 ## Your first tour
 
 ```ts
-import { createTour } from "tourkit";
-import "tourkit/styles.css";
+import { createTour } from "sitetourkit";
+import "sitetourkit/styles.css";
 
 const tour = createTour({
   progress: true,
@@ -32,7 +32,7 @@ Styles can also be injected without a CSS file — useful under a strict CSP or
 inside shadow DOM:
 
 ```ts
-import { injectStyles } from "tourkit/inject-styles";
+import { injectStyles } from "sitetourkit/inject-styles";
 injectStyles({ nonce: myCspNonce }); // idempotent, returns a cleanup function
 ```
 
@@ -76,8 +76,8 @@ For server-rendered pages, `bindTriggers()` starts tours from any
 `[data-tour-trigger]` element with zero application JS:
 
 ```ts
-import { bindTriggers } from "tourkit";
-import { de } from "tourkit/locales"; // ar, de, es, fr, it, ja, pl, ptBR, ru, tr, zhCN
+import { bindTriggers } from "sitetourkit";
+import { de } from "sitetourkit/locales"; // ar, de, es, fr, it, ja, pl, ptBR, ru, tr, zhCN
 
 const unbind = bindTriggers(document, { labels: de });
 ```
@@ -118,7 +118,7 @@ To decide _whether_ to offer that resume — before building the tour — ask th
 library instead of reading storage yourself:
 
 ```ts
-import { getPersistedProgress } from "tourkit";
+import { getPersistedProgress } from "sitetourkit";
 
 if (getPersistedProgress("tour:orders") !== null) showResumeBanner();
 ```

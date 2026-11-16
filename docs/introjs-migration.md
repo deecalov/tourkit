@@ -6,7 +6,7 @@
 
 ## 0. Migration checklist
 
-- [ ] For an incremental migration, start with `tourkit/compat-introjs`.
+- [ ] For an incremental migration, start with `sitetourkit/compat-introjs`.
 - [ ] Replace the library and stylesheet imports.
 - [ ] Replace `introJs.tour().setOptions()` with `createTour()` when using the native API.
 - [ ] Map `element` to `target`, `intro` to `content`, and `position` to `placement`.
@@ -15,7 +15,7 @@
 - [ ] Replace declarative `data-intro*` attributes with `data-tour*`.
 - [ ] Enable `allowHTML` only for content that needs markup; sanitize untrusted HTML.
 - [ ] Replace cookie-based opt-out with `showOnce`.
-- [ ] Replace hints with `createHints` from `tourkit/hints`.
+- [ ] Replace hints with `createHints` from `sitetourkit/hints`.
 - [ ] Port `.introjs-*` styles to `--tk-*` variables and `.tk-*` hooks.
 
 ## 1. Imports
@@ -23,8 +23,8 @@
 ```diff
 - import introJs from "intro.js";
 - import "intro.js/introjs.css";
-+ import { createTour } from "tourkit";
-+ import "tourkit/styles.css";
++ import { createTour } from "sitetourkit";
++ import "sitetourkit/styles.css";
 ```
 
 Without a bundler, load `dist/index.global.js`, which exposes
@@ -185,21 +185,21 @@ accepts `sanitize`; use `tooltipRenderAsHtml: false` when HTML is unnecessary.
 
 ## 7. Instance methods, opt-out and hints
 
-| Intro.js                            | TourKit                                                          |
-| ----------------------------------- | ---------------------------------------------------------------- |
-| `start()`                           | `start()`; asynchronous, returns false when no tour is shown     |
-| `exit(force)`                       | `exit(force)`                                                    |
-| `nextStep()`, `previousStep()`      | `next()`, `back()`                                               |
-| `goToStep(n)`                       | `goTo(n - 1)`                                                    |
-| `goToStepNumber(n)`                 | Find the corresponding zero-based index in `tour.steps`          |
-| `addStep`, `addSteps`, `setSteps`   | `setOptions({ steps })`                                          |
-| `refresh(refreshSteps)`             | `refresh(rescanSteps)`                                           |
-| `setOption`, `setOptions`           | `setOptions(patch)`                                              |
-| `getCurrentStep()`, `currentStep()` | `index`; undefined outside an active tour                        |
-| `isActive()`, `hasStarted()`        | `isActive`                                                       |
-| `clone()`                           | `createTour(sameOptions)`                                        |
-| `setDontShowAgain()`                | `showOnce` and its checkbox                                      |
-| `introJs.hint.*`                    | `createHints` from `tourkit/hints`, or the compatibility adapter |
+| Intro.js                            | TourKit                                                              |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `start()`                           | `start()`; asynchronous, returns false when no tour is shown         |
+| `exit(force)`                       | `exit(force)`                                                        |
+| `nextStep()`, `previousStep()`      | `next()`, `back()`                                                   |
+| `goToStep(n)`                       | `goTo(n - 1)`                                                        |
+| `goToStepNumber(n)`                 | Find the corresponding zero-based index in `tour.steps`              |
+| `addStep`, `addSteps`, `setSteps`   | `setOptions({ steps })`                                              |
+| `refresh(refreshSteps)`             | `refresh(rescanSteps)`                                               |
+| `setOption`, `setOptions`           | `setOptions(patch)`                                                  |
+| `getCurrentStep()`, `currentStep()` | `index`; undefined outside an active tour                            |
+| `isActive()`, `hasStarted()`        | `isActive`                                                           |
+| `clone()`                           | `createTour(sameOptions)`                                            |
+| `setDontShowAgain()`                | `showOnce` and its checkbox                                          |
+| `introJs.hint.*`                    | `createHints` from `sitetourkit/hints`, or the compatibility adapter |
 
 ```js
 createTour({
@@ -212,7 +212,7 @@ createTour({
 Completion stores the seen marker; Escape does not.
 
 ```js
-import { createHints } from "tourkit/hints";
+import { createHints } from "sitetourkit/hints";
 createHints({
   rememberDismissed: { key: "hints:page" },
   hints: [{ target: "#export", content: "Export to Excel", markerPosition: "top-end" }],
@@ -225,7 +225,7 @@ Hint positions map `top-middle` to `top-center` and `middle-right` to
 For incremental migration:
 
 ```js
-import { introJs } from "tourkit/compat-introjs";
+import { introJs } from "sitetourkit/compat-introjs";
 introJs.tour().setOptions({ steps }).oncomplete(fn).start();
 ```
 

@@ -1,7 +1,7 @@
 # TourKit
 
 [![CI](https://github.com/deecalov/tourkit/actions/workflows/ci.yml/badge.svg)](https://github.com/deecalov/tourkit/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/tourkit)](https://www.npmjs.com/package/tourkit)
+[![npm](https://img.shields.io/npm/v/sitetourkit)](https://www.npmjs.com/package/sitetourkit)
 [![bundle size](https://img.shields.io/badge/core-10.7%20KB%20brotli-blue)](#)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -41,12 +41,14 @@ APIs) — methodology and full numbers in
 ## Quick start
 
 ```bash
-npm install tourkit
+npm install sitetourkit
 ```
 
+TourKit is published on npm as `sitetourkit`.
+
 ```ts
-import { createTour } from "tourkit";
-import "tourkit/styles.css"; // or: import { injectStyles } from "tourkit/inject-styles"
+import { createTour } from "sitetourkit";
+import "sitetourkit/styles.css"; // or: import { injectStyles } from "sitetourkit/inject-styles"
 
 const tour = createTour({
   steps: [
@@ -72,7 +74,7 @@ createTour({
   ],
 });
 
-import { highlight } from "tourkit";
+import { highlight } from "sitetourkit";
 const spot = highlight("#export-button"); // standalone spotlight, no tooltip
 spot.move("#next-thing");
 spot.destroy(); // or Esc / backdrop click
@@ -98,7 +100,7 @@ createTour().start(); // scans [data-tour] when no steps are configured
 ### Hints (v0.2)
 
 ```ts
-import { createHints } from "tourkit/hints";
+import { createHints } from "sitetourkit/hints";
 
 const hints = createHints({
   rememberDismissed: { key: "hints:main" }, // dismissed hints stay hidden
@@ -117,12 +119,12 @@ createTour({ showOnce: { key: "tour:onboarding", checkbox: true }, steps }); // 
 
 ### Migration from intro.js
 
-`tourkit/compat-introjs` is a **migration adapter**, not a 100% drop-in
+`sitetourkit/compat-introjs` is a **migration adapter**, not a 100% drop-in
 replacement. It maps the intro.js option names, callbacks, `data-intro`
 attributes and 1-based step numbers onto TourKit:
 
 ```ts
-import { introJs } from "tourkit/compat-introjs";
+import { introJs } from "sitetourkit/compat-introjs";
 introJs
   .tour()
   .setOptions({ steps: [{ element: "#a", intro: "Text" }] })
@@ -152,8 +154,8 @@ createTour({
   ],
 });
 
-import { de } from "tourkit/locales"; // ar, de, es, fr, it, ja, pl, ptBR, ru, tr, zhCN
-import { bindTriggers } from "tourkit";
+import { de } from "sitetourkit/locales"; // ar, de, es, fr, it, ja, pl, ptBR, ru, tr, zhCN
+import { bindTriggers } from "sitetourkit";
 bindTriggers(document, { labels: de }); // [data-tour-trigger] buttons just work
 ```
 
@@ -170,7 +172,7 @@ createTour({ modal: true, lockScroll: true, steps });
 createTour({ allowHTML: true, sanitize: (html) => DOMPurify.sanitize(html), steps });
 
 // Your own UI on top of the DOM-free engine.
-import { TourEngine, type EngineDelegate } from "tourkit";
+import { TourEngine, type EngineDelegate } from "sitetourkit";
 new TourEngine(myDelegate).start(steps);
 ```
 

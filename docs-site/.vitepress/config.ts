@@ -17,7 +17,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "API", link: "/api/" },
       { text: "Playground", link: "https://deecalov.github.io/tourkit/demo/" },
-      { text: "npm", link: "https://www.npmjs.com/package/tourkit" },
+      { text: "npm", link: "https://www.npmjs.com/package/sitetourkit" },
     ],
     sidebar: {
       "/guide/": [

@@ -11,7 +11,9 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const { version: pkgVersion } = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
+const { name: pkgName, version: pkgVersion } = JSON.parse(
+  readFileSync(resolve(root, "package.json"), "utf8")
+);
 
 const run = (cmd, args, cwd) =>
   execFileSync(cmd, args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
@@ -25,6 +27,7 @@ const runNpm = (args, cwd) =>
     : run(process.platform === "win32" ? "npm.cmd" : "npm", args, cwd);
 
 const workDir = mkdtempSync(join(tmpdir(), "tourkit-pack-"));
+const packageDir = join(workDir, "node_modules", ...pkgName.split("/"));
 let failed = false;
 
 try {
@@ -39,17 +42,17 @@ try {
 
   const cjsCheck = `
     const assert = require("node:assert");
-    const core = require("tourkit");
+    const core = require("${pkgName}");
     assert.equal(typeof core.createTour, "function", "createTour (cjs)");
     assert.equal(typeof core.highlight, "function", "highlight (cjs)");
-    assert.equal(typeof core.version, "string", "version (cjs)");
-    const hints = require("tourkit/hints");
+    assert.equal(core.version, "${pkgVersion}", "version (cjs)");
+    const hints = require("${pkgName}/hints");
     assert.equal(typeof hints.createHints, "function", "createHints (cjs)");
-    const compat = require("tourkit/compat-introjs");
+    const compat = require("${pkgName}/compat-introjs");
     assert.equal(typeof compat.introJs, "function", "introJs (cjs)");
-    const locales = require("tourkit/locales");
+    const locales = require("${pkgName}/locales");
     assert.equal(typeof locales.ru.next, "string", "locales.ru (cjs)");
-    const inject = require("tourkit/inject-styles");
+    const inject = require("${pkgName}/inject-styles");
     assert.equal(typeof inject.injectStyles, "function", "injectStyles (cjs)");
     assert.equal(typeof inject.css, "string", "css (cjs)");
     console.log("cjs require: ok");
@@ -59,14 +62,14 @@ try {
 
   const esmCheck = `
     import assert from "node:assert";
-    import { createTour, highlight, version } from "tourkit";
-    import { createHints } from "tourkit/hints";
-    import { introJs } from "tourkit/compat-introjs";
-    import { ru } from "tourkit/locales";
-    import { injectStyles, css } from "tourkit/inject-styles";
+    import { createTour, highlight, version } from "${pkgName}";
+    import { createHints } from "${pkgName}/hints";
+    import { introJs } from "${pkgName}/compat-introjs";
+    import { ru } from "${pkgName}/locales";
+    import { injectStyles, css } from "${pkgName}/inject-styles";
     assert.equal(typeof createTour, "function", "createTour (esm)");
     assert.equal(typeof highlight, "function", "highlight (esm)");
-    assert.equal(typeof version, "string", "version (esm)");
+    assert.equal(version, "${pkgVersion}", "version (esm)");
     assert.equal(typeof createHints, "function", "createHints (esm)");
     assert.equal(typeof introJs, "function", "introJs (esm)");
     assert.equal(typeof ru.next, "string", "locales.ru (esm)");
@@ -77,7 +80,7 @@ try {
   writeFileSync(join(workDir, "check.mjs"), esmCheck);
   console.log(run(process.execPath, ["check.mjs"], workDir).trim());
 
-  const styles = join(workDir, "node_modules", "tourkit", "dist", "styles.css");
+  const styles = join(packageDir, "dist", "styles.css");
   if (!existsSync(styles)) throw new Error("dist/styles.css missing from the package");
   if (!readFileSync(styles, "utf8").includes(`TourKit v${pkgVersion} | MIT License`)) {
     throw new Error("dist/styles.css banner does not carry the package version");
@@ -92,7 +95,7 @@ try {
     "locales.global.js": "TourKitLocales",
   };
   for (const [file, name] of Object.entries(globals)) {
-    const path = join(workDir, "node_modules", "tourkit", "dist", file);
+    const path = join(packageDir, "dist", file);
     if (!existsSync(path)) throw new Error(`dist/${file} missing from the package`);
     if (!readFileSync(path, "utf8").includes(name)) {
       throw new Error(`dist/${file} does not define the ${name} global`);
@@ -103,9 +106,7 @@ try {
   // Vendoring (files copied into wwwroot, no bundler) needs stable names: a
   // hashed shared chunk would have to be re-copied under a new name on every
   // release, and nothing in the HTML would point at it.
-  const chunks = readdirSync(join(workDir, "node_modules", "tourkit", "dist")).filter((file) =>
-    file.startsWith("chunk-")
-  );
+  const chunks = readdirSync(join(packageDir, "dist")).filter((file) => file.startsWith("chunk-"));
   if (chunks.length > 0) {
     throw new Error(`hashed chunks leaked into the package: ${chunks.join(", ")}`);
   }

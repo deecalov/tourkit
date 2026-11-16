@@ -17,7 +17,7 @@ const injected = new WeakMap<Document | ShadowRoot, () => void>();
 
 /**
  * Injects the TourKit stylesheet without a separate CSS file — the CSP-safe
- * alternative to linking `tourkit/styles.css` (spec §7): constructable
+ * alternative to linking `sitetourkit/styles.css` (spec §7): constructable
  * stylesheets when available, otherwise a `<style>` element that honors the
  * provided nonce. Idempotent per target; returns a cleanup function.
  */

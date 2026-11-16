@@ -91,8 +91,13 @@ CHANGELOG section. Uploading the main branch does not publish an npm package.
 
 ### First publication
 
+The npm distribution is named `sitetourkit`; the library and GitHub repository
+retain the TourKit name. npm rejected the original `tourkit` name because it
+was too similar to the existing `tour-kit` package. The unsuccessful `v0.7.0`
+tag is retained; the first publication under the new name uses `v0.7.1`.
+
 1. Select the maintainer's npm account and enable its two-factor authentication.
-2. Recheck `npm view tourkit` immediately before releasing. A 404 means that the
+2. Recheck `npm view sitetourkit` immediately before releasing. A 404 means that the
    lookup did not find a published package; it does not reserve the name or
    prove that a publish will be accepted.
 3. For the existing noninteractive bootstrap workflow, create an authorized
@@ -101,14 +106,14 @@ CHANGELOG section. Uploading the main branch does not publish an npm package.
    packages will not grant permission to create this package. Keep its value
    outside Git, documentation, artifacts and chat messages.
 4. Confirm the release version in `package.json`, `package-lock.json` and
-   `CHANGELOG.md`. The first planned package version is currently `0.7.0`;
+   `CHANGELOG.md`. The first planned package version is currently `0.7.1`;
    it does not need to start at `0.1.0`.
 5. Run the full checks and review the archive before creating a release tag.
 6. Only when publication is intended, create and push the matching tag:
 
    ```bash
-   git tag v0.7.0
-   git push origin v0.7.0
+   git tag -a v0.7.1 -m "TourKit 0.7.1"
+   git push origin v0.7.1
    ```
 
 The tag push is the publication trigger. Do not use it as a build-only test.
@@ -137,7 +142,7 @@ repository and inspect its file list:
 ```bash
 node -e "require('node:fs').mkdirSync('../tourkit-release', { recursive: true })"
 npm pack --json --pack-destination ../tourkit-release
-npm publish ../tourkit-release/tourkit-0.7.0.tgz --dry-run --ignore-scripts --access public
+npm publish ../tourkit-release/sitetourkit-0.7.1.tgz --dry-run --ignore-scripts --access public
 ```
 
 `--ignore-scripts` is appropriate here because the validation/build lifecycle
@@ -209,6 +214,7 @@ Build and browser warnings to retain for later documentation maintenance:
   `/favicon.ico` request returns 404. No application runtime errors were
   observed in the demo walkthrough or the API page.
 
-These checks cover the local source snapshot. GitHub-hosted Actions, Pages and
-npm publication require the repository/account setup above and have not been
-executed as part of preparing this folder.
+These checks cover the local source snapshot. GitHub-hosted CI and CodeQL also
+passed for the public export. Pages has not been deployed. The `v0.7.0` release
+attempt passed its package checks but npm rejected the original package name;
+no npm version or GitHub Release was created by that attempt.

@@ -1,7 +1,7 @@
 # Embedding: shadow DOM, script tags and CSP
 
 TourKit assumes nothing about your build. This page covers the three setups
-that need more than `import { createTour } from "tourkit"`.
+that need more than `import { createTour } from "sitetourkit"`.
 
 ## Web components and shadow DOM
 
@@ -40,12 +40,12 @@ Notes:
 
 ## Styles without a CSS file (CSP, micro-frontends)
 
-`tourkit/styles.css` is a plain stylesheet you can import or link. When a
+`sitetourkit/styles.css` is a plain stylesheet you can import or link. When a
 strict `style-src` policy or a shadow root makes that awkward, inject the
 stylesheet from JavaScript instead:
 
 ```ts
-import { injectStyles } from "tourkit/inject-styles";
+import { injectStyles } from "sitetourkit/inject-styles";
 
 const cleanup = injectStyles(); // constructable stylesheet, no <style> element
 ```
@@ -68,10 +68,10 @@ Every entry point has a global build for server-rendered pages — ASP.NET MVC,
 Rails, Django, plain HTML:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/tourkit/dist/styles.css" />
-<script src="https://unpkg.com/tourkit/dist/index.global.js"></script>
-<script src="https://unpkg.com/tourkit/dist/hints.global.js"></script>
-<script src="https://unpkg.com/tourkit/dist/locales.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/sitetourkit/dist/styles.css" />
+<script src="https://unpkg.com/sitetourkit/dist/index.global.js"></script>
+<script src="https://unpkg.com/sitetourkit/dist/hints.global.js"></script>
+<script src="https://unpkg.com/sitetourkit/dist/locales.global.js"></script>
 
 <script>
   TourKit.createTour({ labels: TourKitLocales.de }).start();
@@ -152,7 +152,7 @@ The engine is DOM-free: it owns the state machine, the transition queue and the
 event lifecycle, and delegates every visual to you.
 
 ```ts
-import { TourEngine, resolveTarget, type EngineDelegate } from "tourkit";
+import { TourEngine, resolveTarget, type EngineDelegate } from "sitetourkit";
 
 const delegate: EngineDelegate = {
   mount: () => myOverlay.open(),

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.1 — 2026-11-16
+
+The npm package is now distributed as **sitetourkit**. Install it with
+`npm install sitetourkit` and use `sitetourkit` in imports, including optional
+entries such as `sitetourkit/hints` and `sitetourkit/styles.css`.
+
+- Updated installation examples, npm/CDN links and packed-consumer checks.
+- Synchronized package and lockfile versions for the first npm publication.
+- TourKit APIs, browser globals and the GitHub repository remain unchanged.
+
 ## 0.7.0 — 2026-07-25
 
 This release improves integration with ASP.NET Core applications and SPAs

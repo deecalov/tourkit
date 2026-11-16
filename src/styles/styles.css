@@ -8,7 +8,7 @@
  *
  * The version is intentionally absent here: scripts/copy-styles.mjs stamps it
  * into dist/styles.css at build time. Keeping the source free of it means the
- * committed css.generated.ts (embedded for `tourkit/inject-styles`) never
+ * committed css.generated.ts (embedded for `sitetourkit/inject-styles`) never
  * drifts when the package version is bumped.
  */
 

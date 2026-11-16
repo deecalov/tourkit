@@ -139,8 +139,8 @@ has no dependency on browser views, allowing isolated tests and custom UIs.
 ### 4.1. Tour factory
 
 ```ts
-import { createTour } from "tourkit";
-import "tourkit/styles.css";
+import { createTour } from "sitetourkit";
+import "sitetourkit/styles.css";
 
 const tour = createTour({
   steps: [
@@ -217,7 +217,7 @@ gaps in discovery order, and skips hidden elements.
 ### 4.5. Hints
 
 ```ts
-import { createHints } from "tourkit/hints";
+import { createHints } from "sitetourkit/hints";
 
 const hints = createHints({
   hints: [{ target: "#export", content: "Export to Excel", markerPosition: "top-end" }],
@@ -234,7 +234,7 @@ the placement engine and storage adapter, with declarative `data-hint*` support.
 
 ### 4.6. Migration adapter
 
-The adapter is an optional `tourkit/compat-introjs` entry. It maps legacy option
+The adapter is an optional `sitetourkit/compat-introjs` entry. It maps legacy option
 and callback names while reporting unsupported behavior. It is excluded from
 the main bundle.
 

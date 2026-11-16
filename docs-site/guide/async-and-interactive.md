@@ -68,7 +68,7 @@ event.
 Spotlight an element without a tour — no tooltip, no focus management:
 
 ```ts
-import { highlight } from "tourkit";
+import { highlight } from "sitetourkit";
 
 const spot = highlight("#export-button", {
   overlay: { padding: 10, radius: 12 },
