@@ -106,7 +106,7 @@ tag is retained; the first publication under the new name uses `v0.7.1`.
    packages will not grant permission to create this package. Keep its value
    outside Git, documentation, artifacts and chat messages.
 4. Confirm the release version in `package.json`, `package-lock.json` and
-   `CHANGELOG.md`. The first planned package version is currently `0.7.1`;
+   `CHANGELOG.md`. The first published package version is `0.7.1`;
    it does not need to start at `0.1.0`.
 5. Run the full checks and review the archive before creating a release tag.
 6. Only when publication is intended, create and push the matching tag:
@@ -154,6 +154,20 @@ The current package allowlist includes `dist/` without source maps,
 `package.json`, `README.md`, `LICENSE` and `CHANGELOG.md`. Review new files on
 each release. A ZIP intended for file-copy consumers should use the same
 checked payload, with all referenced declaration files and optional entries.
+
+### Confirm registry availability
+
+Successful `npm publish` output can precede public availability by several
+minutes. During the first release, npm temporarily exposed only a
+`0.0.0-stage` placeholder while processing the upload. Version `0.7.1`
+became available automatically; no manual approval was required for this
+direct-publish workflow. Do not retry publication or change the version solely
+because the initial registry lookup returns 404.
+
+Before announcing a release, confirm its exact version and intended dist-tag,
+download its registry tarball, verify `dist.integrity` and `dist.shasum`, and
+install it in a clean consumer project. Attach that verified tarball and a ZIP
+of the same contents to GitHub Releases, along with `SHA256SUMS.txt`.
 
 ### Recommended workflow improvements
 
@@ -218,3 +232,8 @@ These checks cover the local source snapshot. GitHub-hosted CI and CodeQL also
 passed for the public export. Pages has not been deployed. The `v0.7.0` release
 attempt passed its package checks but npm rejected the original package name;
 no npm version or GitHub Release was created by that attempt.
+
+The subsequent `v0.7.1` release published `sitetourkit@0.7.1` with GitHub Actions
+provenance on 2026-11-16. Its CI, CodeQL and release workflow passed. The npm
+tarball's integrity and contents were verified against the reviewed build.
+Downloads are available from the [GitHub Release](https://github.com/deecalov/tourkit/releases/tag/v0.7.1).
