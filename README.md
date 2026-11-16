@@ -7,7 +7,6 @@
 
 Lightweight, dependency-free product tours and onboarding walkthroughs.
 MIT-licensed, accessible, framework-agnostic.
-**Independently implemented; contains no Intro.js source code. Not affiliated with Intro.js.**
 
 - **SVG spotlight** instead of z-index hacks — works inside `transform`/`filter` stacking contexts, never mutates your DOM.
 - **Async targets (SPA-ready)**: steps wait for lazily mounted elements and the spotlight flows to them when they appear (`waitForTarget`); no "element not found" failures.
@@ -317,17 +316,6 @@ Visual baselines are platform-specific; see
 | `docs/`             | Design, integration, migration, benchmark and release documentation |
 | `bench/`            | Reproducible comparison stand and recorded results                  |
 | `.github/`          | CI, releases, Pages, dependency updates and issue templates         |
-
-## Provenance
-
-TourKit is an independent implementation written from scratch for this
-repository. **No Intro.js source code, styles or other content is included in
-TourKit, and none was copied during development.** The Intro.js repository
-(distributed under AGPLv3 or a commercial license) was studied for technical
-analysis, behavior comparison and compatibility of the migration adapter with
-its public API; that analysis is documented in this repository. TourKit is MIT
-and is not affiliated with Intro.js. This section states facts about the
-development process, not a legal assessment.
 
 ## License
 
