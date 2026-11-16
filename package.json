@@ -180,7 +180,7 @@
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "intro.js": "^8.3.2",
-    "jsdom": "^26.1.0",
+    "jsdom": "^31.0.1",
     "prettier": "^3.9.5",
     "publint": "^0.3.21",
     "size-limit": "^12.1.0",
