@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TourKit — page 2</title>
+    <style>
+      :root {
+        --bg: #f6f8f9;
+        --surface: #ffffff;
+        --surface-glass: rgb(255 255 255 / 0.82);
+        --text: #1c2126;
+        --muted: #5f6b76;
+        --border: #dbe2e8;
+        --accent: #0d9488;
+        --accent-weak: rgb(13 148 136 / 0.09);
+        --glow: rgb(13 148 136 / 0.08);
+        --shadow-sm: 0 1px 2px rgb(18 26 33 / 0.05);
+        --shadow-md: 0 10px 28px rgb(18 26 33 / 0.1);
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background:
+          radial-gradient(1100px 460px at 75% -12%, var(--glow), transparent 60%), var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+      header.topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 16px;
+        padding: 12px 24px;
+        background: var(--surface-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.01em;
+      }
+      .logo__mark {
+        width: 13px;
+        height: 13px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #0d9488, #0f766e);
+        box-shadow: 0 0 0 3px var(--accent-weak);
+      }
+      a.btn {
+        margin-inline-start: auto;
+        padding: 9px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          border-color 0.15s;
+        touch-action: manipulation;
+      }
+      a.btn:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+      a.btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 24px 40px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 14px;
+        box-shadow: var(--shadow-sm);
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        letter-spacing: -0.01em;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      @media (max-width: 560px) {
+        header.topbar {
+          padding: 10px 12px;
+        }
+        .logo {
+          font-size: 15px;
+        }
+        a.btn {
+          padding: 8px 12px;
+          font-size: 13px;
+        }
+        main {
+          padding: 16px 16px 32px;
+        }
+        .card {
+          padding: 16px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        a.btn {
+          transition: none;
+        }
+        a.btn:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="logo"><span class="logo__mark" aria-hidden="true"></span>TourKit — page 2</span>
+      <a class="btn" id="to-index" href="./index.html">Back home</a>
+    </header>
+
+    <main>
+      <section class="card" id="p2-block">
+        <h3>The tour continues</h3>
+        <p>If you arrived from the multi-page tour, it resumed automatically.</p>
+      </section>
+      <section class="card" id="p2-end">
+        <h3>Last step</h3>
+        <p>The tour ends here and the progress key is cleared.</p>
+      </section>
+    </main>
+
+    <script type="module" src="./page2.ts"></script>
+  </body>
+</html>

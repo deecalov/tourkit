@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest a capability TourKit is missing
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to build, and where does TourKit get in the way?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API
+      description: How would you like it to look in code?
+      render: ts
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you tried
+      description: |
+        Many scenarios are already covered by `renderStep`, function targets,
+        events or a custom `EngineDelegate` — knowing what you ruled out helps.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This should live in the core (not in application code or a recipe)

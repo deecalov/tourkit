@@ -1,0 +1,38 @@
+name: Update visual baselines (linux)
+
+# Regenerates the Playwright visual-regression baselines on ubuntu (the CI
+# platform) and commits the *-linux.png files back to the triggering branch.
+# Run manually once after visual changes; the CI e2e job auto-enables the
+# visual specs as soon as linux baselines exist in the repository.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Regenerate visual baselines
+        run: npx playwright test --project=chromium --grep visual --update-snapshots
+      - name: Upload baselines as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-linux
+          path: tests/e2e/visual.spec.ts-snapshots/*-linux.png
+      - name: Commit baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/visual.spec.ts-snapshots/*-linux.png
+          git diff --cached --quiet || git commit -m "test(e2e): linux visual baselines"
+          git push

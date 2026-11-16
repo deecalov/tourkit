@@ -1,0 +1,57 @@
+name: Release
+
+# Publishes tourkit to npm on a version tag (v0.5.0, v1.0.0, ...).
+#
+# Authentication:
+# - First publish: create a granular automation token on npmjs.com and store
+#   it as the NPM_TOKEN repository secret (trusted publishing cannot create
+#   new packages).
+# - After the package exists: configure a Trusted Publisher on npmjs.com
+#   (repo deecalov/tourkit, workflow release.yml), delete the secret — the
+#   npm CLI (>= 11.5.1) picks up OIDC automatically and provenance is
+#   attached by default.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # GitHub Release
+  id-token: write # npm trusted publishing (OIDC) + provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install -g npm@latest # OIDC needs npm >= 11.5.1
+      - run: npm ci
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION" >&2
+            exit 1
+          fi
+      # prepublishOnly runs the full chain: lint, typecheck, unit tests,
+      # build, size budgets, publint/attw, pack smoke test.
+      # --provenance is explicit on purpose: with trusted publishing it is the
+      # default, but the first (token-authenticated) publish would otherwise
+      # ship unsigned. The id-token permission above covers both paths.
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Extract changelog section
+        run: node .github/extract-changelog.mjs "${GITHUB_REF_NAME#v}" CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "TourKit $GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"

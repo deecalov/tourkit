@@ -1,0 +1,197 @@
+{
+  "name": "tourkit",
+  "version": "0.7.0",
+  "description": "Lightweight, dependency-free product tours and onboarding walkthroughs. MIT-licensed, accessible, framework-agnostic.",
+  "keywords": [
+    "tour",
+    "onboarding",
+    "walkthrough",
+    "guide",
+    "spotlight",
+    "product-tour",
+    "tooltip"
+  ],
+  "license": "MIT",
+  "author": "deecalov",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deecalov/tourkit.git"
+  },
+  "homepage": "https://github.com/deecalov/tourkit#readme",
+  "bugs": {
+    "url": "https://github.com/deecalov/tourkit/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "hints": [
+        "./dist/hints.d.ts"
+      ],
+      "compat-introjs": [
+        "./dist/compat-introjs.d.ts"
+      ],
+      "locales": [
+        "./dist/locales.d.ts"
+      ],
+      "inject-styles": [
+        "./dist/inject-styles.d.ts"
+      ]
+    }
+  },
+  "unpkg": "./dist/index.global.js",
+  "jsdelivr": "./dist/index.global.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./hints": {
+      "import": {
+        "types": "./dist/hints.d.ts",
+        "default": "./dist/hints.js"
+      },
+      "require": {
+        "types": "./dist/hints.d.cts",
+        "default": "./dist/hints.cjs"
+      }
+    },
+    "./compat-introjs": {
+      "import": {
+        "types": "./dist/compat-introjs.d.ts",
+        "default": "./dist/compat-introjs.js"
+      },
+      "require": {
+        "types": "./dist/compat-introjs.d.cts",
+        "default": "./dist/compat-introjs.cjs"
+      }
+    },
+    "./locales": {
+      "import": {
+        "types": "./dist/locales.d.ts",
+        "default": "./dist/locales.js"
+      },
+      "require": {
+        "types": "./dist/locales.d.cts",
+        "default": "./dist/locales.cjs"
+      }
+    },
+    "./inject-styles": {
+      "import": {
+        "types": "./dist/inject-styles.d.ts",
+        "default": "./dist/inject-styles.js"
+      },
+      "require": {
+        "types": "./dist/inject-styles.d.cts",
+        "default": "./dist/inject-styles.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "gen:css": "node scripts/gen-css-module.mjs",
+    "build": "npm run gen:css && tsup && node scripts/copy-styles.mjs",
+    "docs:api": "typedoc",
+    "docs:dev": "npm run docs:api && vitepress dev docs-site",
+    "docs:build": "npm run docs:api && vitepress build docs-site",
+    "site:build": "npm run build && vite build demo --base ./ && node scripts/build-site.mjs && npm run docs:build",
+    "dev": "vite demo --open",
+    "demo": "vite demo",
+    "landing": "npm run build && vite --open /landing/",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "bench": "playwright test -c playwright.bench.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "size": "size-limit",
+    "lint:pkg": "publint && attw --pack . --exclude-entrypoints styles.css",
+    "test:pack": "node scripts/pack-smoke.mjs",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build && npm run size && npm run lint:pkg && npm run test:pack"
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "11 KB"
+    },
+    {
+      "path": "dist/hints.js",
+      "limit": "6 KB"
+    },
+    {
+      "path": "dist/compat-introjs.js",
+      "limit": "15 KB"
+    },
+    {
+      "path": "dist/locales.js",
+      "limit": "2 KB"
+    },
+    {
+      "path": "dist/index.global.js",
+      "limit": "11.5 KB"
+    },
+    {
+      "path": "dist/hints.global.js",
+      "limit": "7 KB"
+    },
+    {
+      "path": "dist/compat-introjs.global.js",
+      "limit": "16 KB"
+    },
+    {
+      "path": "dist/inject-styles.js",
+      "limit": "4.5 KB"
+    },
+    {
+      "path": "dist/styles.css",
+      "limit": "4.5 KB"
+    }
+  ],
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@axe-core/playwright": "^4.12.1",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
+    "@size-limit/file": "^12.1.0",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "driver.js": "^1.8.0",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "intro.js": "^8.3.2",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.9.5",
+    "publint": "^0.3.21",
+    "size-limit": "^12.1.0",
+    "tsup": "^8.5.0",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.12.0",
+    "typedoc-vitepress-theme": "^1.1.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.63.0",
+    "vite": "^7.0.4",
+    "vitepress": "^1.6.4",
+    "vitest": "^3.2.4"
+  }
+}

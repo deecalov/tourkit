@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="TourKit — a lightweight MIT library for product tours, onboarding and contextual hints. Dependency-free, accessible and framework-agnostic."
+    />
+    <meta name="theme-color" content="#f7f9fc" />
+    <meta property="og:title" content="TourKit — product tours that feel native" />
+    <meta
+      property="og:description"
+      content="Professional onboarding without dependencies, z-index hacks or framework lock-in."
+    />
+    <title>TourKit — product tours that feel like part of your UI</title>
+
+    <link rel="stylesheet" href="../dist/styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="../dist/index.global.js"></script>
+    <script defer src="./script.js"></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header" data-header>
+      <div class="container header-inner">
+        <a class="brand" href="#top" aria-label="TourKit — home">
+          <svg class="brand-mark" viewBox="0 0 38 38" aria-hidden="true">
+            <path
+              d="M11.5 8.5h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15a3 3 0 0 1 3-3Z"
+            />
+            <path d="M14 14h10M14 19h7M14 24h4" />
+            <circle cx="25.5" cy="24" r="2.5" />
+          </svg>
+          <span>TourKit</span>
+          <span class="version">v0.7</span>
+        </a>
+
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="main-navigation"
+          data-menu-toggle
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="main-nav" id="main-navigation" aria-label="Main navigation" data-menu>
+          <a href="#features">Features</a>
+          <a href="#developer-experience">For developers</a>
+          <a href="#demo">Demo</a>
+          <a href="../README.md">Documentation</a>
+        </nav>
+
+        <a
+          class="button button-ghost header-github"
+          href="https://github.com/deecalov/tourkit"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2.8a9.5 9.5 0 0 0-3 18.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.6 1 1.6 1 .9 1.6 2.3 1.1 2.9.8.1-.7.4-1.1.7-1.3-2.2-.3-4.6-1.1-4.6-4.7 0-1 .4-1.9 1-2.6-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.2 9.2 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.6 0 3.6-2.4 4.4-4.6 4.7.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.5 9.5 0 0 0 12 2.8Z"
+            />
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
+        <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
+
+        <div class="container hero-layout">
+          <div class="hero-copy reveal is-visible">
+            <a class="release-badge" href="../CHANGELOG.md" id="release-badge">
+              <span class="release-dot"></span>
+              TourKit 0.5 is here
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+            </a>
+
+            <h1>
+              Onboarding that feels like
+              <span>part of your product.</span>
+            </h1>
+            <p class="hero-lead">
+              Build product tours and contextual hints without dependencies, z-index hacks or
+              framework lock-in. Accessible, fast and fully under your control.
+            </p>
+
+            <div class="hero-actions">
+              <button class="button button-primary button-large" type="button" id="start-hero-tour">
+                Start live demo
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+              </button>
+              <a class="button button-secondary button-large" href="#developer-experience">
+                Quick start
+              </a>
+            </div>
+
+            <div class="install-command" id="install-command">
+              <span class="terminal-prompt" aria-hidden="true">$</span>
+              <code>npm install tourkit</code>
+              <button type="button" data-copy="npm install tourkit" aria-label="Copy command">
+                <svg class="copy-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <rect x="6.5" y="6.5" width="9" height="9" rx="2" />
+                  <path
+                    d="M13.5 6.5V5A1.5 1.5 0 0 0 12 3.5H5A1.5 1.5 0 0 0 3.5 5v7A1.5 1.5 0 0 0 5 13.5h1.5"
+                  />
+                </svg>
+                <svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="m4 10 4 4 8-9" />
+                </svg>
+              </button>
+            </div>
+
+            <ul class="hero-trust" aria-label="Key characteristics">
+              <li>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg>MIT
+                license
+              </li>
+              <li>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg>Zero
+                dependencies
+              </li>
+              <li>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg>SSR-safe
+              </li>
+            </ul>
+          </div>
+
+          <div class="product-stage reveal is-visible" id="product-stage">
+            <div class="floating-chip chip-top"><span></span>Live positioning</div>
+            <div class="floating-chip chip-bottom">⌘&nbsp; Keyboard ready</div>
+
+            <div class="browser-shell">
+              <div class="browser-bar">
+                <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="address-bar">
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <rect x="3" y="7" width="10" height="7" rx="2" />
+                    <path d="M5.5 7V5.5a2.5 2.5 0 0 1 5 0V7" />
+                  </svg>
+                  app.acme.dev/dashboard
+                </div>
+                <div class="browser-actions" aria-hidden="true">•••</div>
+              </div>
+
+              <div class="app-shell">
+                <aside class="app-sidebar">
+                  <div class="app-logo"><span></span><b>Acme</b></div>
+                  <div class="app-nav">
+                    <button class="active" type="button" id="preview-navigation">
+                      <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M3 10 10 4l7 6v6a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1v-6Z" />
+                      </svg>
+                      Overview
+                    </button>
+                    <button type="button">
+                      <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M4 16V9m4 7V5m4 11v-4m4 4V7" /></svg
+                      >Analytics
+                    </button>
+                    <button type="button">
+                      <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <circle cx="7" cy="8" r="3" />
+                        <path
+                          d="M2 17c.5-3 2.4-5 5-5s4.5 2 5 5m1-12a3 3 0 0 1 0 6m5 6c-.3-2.2-1.5-3.8-3.3-4.6"
+                        /></svg
+                      >Customers
+                    </button>
+                    <button type="button">
+                      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M3 10h14" /></svg
+                      >Automations
+                    </button>
+                  </div>
+                  <div class="app-user">
+                    <span>AS</span>
+                    <div><b>Alex Smith</b><small>Admin</small></div>
+                  </div>
+                </aside>
+
+                <div class="app-content">
+                  <div class="app-heading">
+                    <div>
+                      <span>Overview</span>
+                      <h2>Good morning, Alex</h2>
+                    </div>
+                    <button type="button">
+                      Last 30 days
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+                    </button>
+                  </div>
+
+                  <div class="metric-grid">
+                    <article class="metric-card" id="preview-metric">
+                      <div class="metric-top">
+                        <span>Active users</span><i class="metric-icon blue">↗</i>
+                      </div>
+                      <strong>24,892</strong>
+                      <small><b>+18.4%</b> from last month</small>
+                    </article>
+                    <article class="metric-card">
+                      <div class="metric-top">
+                        <span>Conversion</span><i class="metric-icon violet">%</i>
+                      </div>
+                      <strong>7.82%</strong>
+                      <small><b>+2.1%</b> from last month</small>
+                    </article>
+                    <article class="metric-card">
+                      <div class="metric-top">
+                        <span>MRR</span><i class="metric-icon cyan">$</i>
+                      </div>
+                      <strong>$48.2k</strong>
+                      <small><b>+12.7%</b> from last month</small>
+                    </article>
+                  </div>
+
+                  <article class="chart-card" id="preview-chart">
+                    <div class="chart-header">
+                      <div><span>Product adoption</span><strong>8,420 events</strong></div>
+                      <div class="chart-legend"><i></i>This period</div>
+                    </div>
+                    <div class="chart-area">
+                      <div class="chart-lines" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                      </div>
+                      <svg
+                        viewBox="0 0 540 150"
+                        preserveAspectRatio="none"
+                        aria-label="Product usage growth chart"
+                      >
+                        <defs>
+                          <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" stop-color="#675cf5" stop-opacity=".24" />
+                            <stop offset="1" stop-color="#675cf5" stop-opacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          class="chart-fill"
+                          d="M0 126C45 116 56 91 102 101s70 3 104-19 70-38 111-15 62 4 93-21 80-17 130-34v138H0Z"
+                        />
+                        <path
+                          class="chart-line"
+                          d="M0 126C45 116 56 91 102 101s70 3 104-19 70-38 111-15 62 4 93-21 80-17 130-34"
+                        />
+                        <circle cx="410" cy="46" r="5" />
+                      </svg>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="proof-bar" aria-label="Project stats">
+        <div class="container proof-grid">
+          <div><strong>~9 KB</strong><span>core brotli</span></div>
+          <div><strong>0</strong><span>runtime dependencies</span></div>
+          <div><strong>285</strong><span>automated tests</span></div>
+          <div><strong>3</strong><span>browser engines</span></div>
+          <div><strong>MIT</strong><span>forever</span></div>
+        </div>
+      </section>
+
+      <section class="section features-section" id="features">
+        <div class="container">
+          <div class="section-heading reveal">
+            <div>
+              <span class="eyebrow">Thought through</span>
+              <h2>Everything you need for<br />a perfect first experience.</h2>
+            </div>
+            <p>
+              TourKit handles the hard geometry, accessibility and tour lifecycle — you focus on the
+              content and your product.
+            </p>
+          </div>
+
+          <div class="feature-bento">
+            <article class="feature-card feature-spotlight reveal">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3a9 9 0 1 0 9 9" />
+                  <path d="M12 7a5 5 0 1 0 5 5" />
+                  <path d="M15 3h6v6M21 3l-7 7" />
+                </svg>
+              </div>
+              <span class="feature-label">SVG spotlight</span>
+              <h3>Works where z-index breaks.</h3>
+              <p>
+                A pure SVG cutout never moves the target element and works reliably inside
+                transform, filter and complex stacking contexts.
+              </p>
+              <div class="spotlight-visual" aria-hidden="true">
+                <div class="spot-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="spot-hole"><span>Target</span></div>
+              </div>
+            </article>
+
+            <article class="feature-card feature-position reveal">
+              <div class="feature-icon cyan">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v18M3 12h18" />
+                  <path d="m8 7 4-4 4 4M17 8l4 4-4 4M8 17l4 4 4-4M7 8l-4 4 4 4" />
+                </svg>
+              </div>
+              <span class="feature-label">Smart positioning</span>
+              <h3>Always stays in the viewport.</h3>
+              <p>
+                Flip, shift, arrow and an automatic fallback to the center — even on a cramped
+                mobile screen.
+              </p>
+              <div class="position-visual" aria-hidden="true">
+                <div class="target-node"></div>
+                <div class="tooltip-node"><span></span><i></i><i></i></div>
+                <svg viewBox="0 0 180 100">
+                  <path d="M45 76c11-27 28-44 64-47" />
+                  <path d="m103 22 9 6-8 7" />
+                </svg>
+              </div>
+            </article>
+
+            <article class="feature-card compact reveal">
+              <div class="feature-icon violet">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="4" y="3" width="16" height="18" rx="3" />
+                  <path d="M8 8h8M8 12h5M8 16h7" />
+                </svg>
+              </div>
+              <h3>Accessible by default</h3>
+              <p>
+                Focus trap and restore, aria-live, keyboard support, reduced motion and real button
+                elements.
+              </p>
+              <div class="feature-tags">
+                <span>WCAG-minded</span><span>Keyboard</span><span>ARIA</span>
+              </div>
+            </article>
+
+            <article class="feature-card compact reveal">
+              <div class="feature-icon amber">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3 4.5 6v5.5c0 4.5 3.2 7.6 7.5 9.5 4.3-1.9 7.5-5 7.5-9.5V6L12 3Z" />
+                  <path d="m8.5 12 2.2 2.2 4.8-5" />
+                </svg>
+              </div>
+              <h3>Safe content</h3>
+              <p>
+                Text is XSS-safe by default. For rich interfaces there is renderStep with a cleanup
+                contract.
+              </p>
+              <div class="safe-code"><span>&lt;</span>safe by default<span>/&gt;</span></div>
+            </article>
+
+            <article class="feature-card compact reveal">
+              <div class="feature-icon green">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 4h14v16H5z" />
+                  <path d="M5 9h14M10 9v11" />
+                </svg>
+              </div>
+              <h3>Any stack</h3>
+              <p>
+                Vanilla JS, React, Vue, Angular, Razor and server-rendered pages. Zero runtime
+                dependencies.
+              </p>
+              <div class="framework-row" aria-label="Supported approaches">
+                <span>JS</span><span>TS</span><span>React</span><span>Vue</span>
+              </div>
+            </article>
+
+            <article class="feature-card compact reveal">
+              <div class="feature-icon rose">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3.5 2" />
+                </svg>
+              </div>
+              <h3>Made for live UIs</h3>
+              <p>
+                Tracks scroll, resize and layout shifts. Re-finds targets after React or Kendo
+                re-renders — and waits for ones that mount late.
+              </p>
+              <div class="pulse-visual" aria-hidden="true">
+                <i></i><i></i><i></i><span>autoUpdate()</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section developer-section" id="developer-experience">
+        <div class="container developer-layout">
+          <div class="developer-copy reveal">
+            <span class="eyebrow">Developer experience</span>
+            <h2>From install to your first tour in under a minute.</h2>
+            <p>
+              A clean, typed API with no magic. The configuration reads like a script, events are
+              predictable, and imports work the same in ESM, CJS and the browser.
+            </p>
+
+            <ul class="check-list">
+              <li>
+                <span
+                  ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg
+                ></span>
+                <div>
+                  <b>TypeScript-first</b><small>Strict options, steps and typed events.</small>
+                </div>
+              </li>
+              <li>
+                <span
+                  ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg
+                ></span>
+                <div>
+                  <b>Five entry points</b
+                  ><small>Core, hints, locales, style injector and the migration adapter.</small>
+                </div>
+              </li>
+              <li>
+                <span
+                  ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg
+                ></span>
+                <div>
+                  <b>CSS custom properties</b
+                  ><small>The TourKit theme blends naturally into your design system.</small>
+                </div>
+              </li>
+            </ul>
+
+            <a class="text-link" href="../README.md">
+              Read the documentation
+              <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9h12M10 4l5 5-5 5" /></svg>
+            </a>
+          </div>
+
+          <div class="code-window reveal" id="code-example">
+            <div class="code-topbar">
+              <div class="code-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="code-tabs" role="tablist" aria-label="Integration examples">
+                <button type="button" role="tab" aria-selected="true" data-code-tab="typescript">
+                  tour.ts
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-code-tab="html">
+                  HTML
+                </button>
+              </div>
+              <button class="code-copy" type="button" data-copy-code aria-label="Copy code">
+                <svg class="copy-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <rect x="6.5" y="6.5" width="9" height="9" rx="2" />
+                  <path
+                    d="M13.5 6.5V5A1.5 1.5 0 0 0 12 3.5H5A1.5 1.5 0 0 0 3.5 5v7A1.5 1.5 0 0 0 5 13.5h1.5"
+                  />
+                </svg>
+                <svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="m4 10 4 4 8-9" />
+                </svg>
+              </button>
+            </div>
+
+            <pre
+              class="code-panel is-active"
+              data-code-panel="typescript"
+            ><code><span class="token-keyword">import</span> { createTour } <span class="token-keyword">from</span> <span class="token-string">"tourkit"</span>;
+<span class="token-keyword">import</span> <span class="token-string">"tourkit/styles.css"</span>;
+
+<span class="token-keyword">const</span> tour = <span class="token-function">createTour</span>({
+  progress: <span class="token-boolean">true</span>,
+  steps: [
+    {
+      title: <span class="token-string">"Welcome"</span>,
+      content: <span class="token-string">"Let's take a quick look around."</span>,
+    },
+    {
+      target: <span class="token-string">"#analytics"</span>,
+      title: <span class="token-string">"Live analytics"</span>,
+      content: <span class="token-string">"All the key metrics live here."</span>,
+      placement: <span class="token-string">"bottom-start"</span>,
+    },
+  ],
+});
+
+tour.<span class="token-function">on</span>(<span class="token-string">"complete"</span>, ({ reason }) =&gt; {
+  analytics.<span class="token-function">track</span>(<span class="token-string">"tour_completed"</span>, { reason });
+});
+
+<span class="token-keyword">await</span> tour.<span class="token-function">start</span>();</code></pre>
+
+            <pre
+              class="code-panel"
+              data-code-panel="html"
+              hidden
+            ><code><span class="token-comment">&lt;!-- Declarative step --&gt;</span>
+<span class="token-tag">&lt;button</span>
+  <span class="token-attr">data-tour-title</span>=<span class="token-string">"Saving"</span>
+  <span class="token-attr">data-tour</span>=<span class="token-string">"Click here to save your work."</span>
+  <span class="token-attr">data-tour-step</span>=<span class="token-string">"2"</span>
+<span class="token-tag">&gt;</span>
+  Save
+<span class="token-tag">&lt;/button&gt;</span>
+
+<span class="token-tag">&lt;script&gt;</span>
+  TourKit.<span class="token-function">createTour</span>().<span class="token-function">start</span>();
+<span class="token-tag">&lt;/script&gt;</span></code></pre>
+
+            <div class="code-status"><span></span>Typed · SSR-safe · Tree-shakeable</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section demo-section" id="demo">
+        <div class="container demo-card reveal">
+          <div class="demo-orbit orbit-one" aria-hidden="true"></div>
+          <div class="demo-orbit orbit-two" aria-hidden="true"></div>
+          <div class="demo-copy">
+            <span class="eyebrow eyebrow-light">Try it yourself</span>
+            <h2>Five steps.<br />Zero surprises.</h2>
+            <p>
+              See how TourKit behaves on a real page: spotlight, auto-scroll, hints, keyboard
+              navigation and the migration adapter.
+            </p>
+            <div class="demo-actions">
+              <button class="button button-white button-large" type="button" id="start-demo-tour">
+                Start the landing tour
+              </button>
+              <a class="button button-dark-ghost button-large" href="../demo/"
+                >Open the playground</a
+              >
+            </div>
+          </div>
+          <div class="demo-terminal" aria-hidden="true">
+            <div class="terminal-bar">
+              <span></span><span></span><span></span><small>tourkit — demo</small>
+            </div>
+            <div class="terminal-content">
+              <p><i>›</i> tour.start()</p>
+              <p><span>✓</span> target resolved</p>
+              <p><span>✓</span> focus trapped</p>
+              <p><span>✓</span> viewport positioned</p>
+              <p><span>✓</span> stepChange <b>2/5</b></p>
+              <div class="terminal-cursor"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section migration-section">
+        <div class="container migration-layout">
+          <div class="migration-visual reveal" aria-hidden="true">
+            <div class="migration-card source-card">
+              <small>Legacy tour</small><strong>introJs()</strong><span>Existing product</span>
+            </div>
+            <div class="migration-path">
+              <i></i><i></i><i></i><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" /></svg>
+            </div>
+            <div class="migration-card target-card">
+              <small>Migration adapter</small><strong>TourKit</strong><span>MIT · modern API</span>
+            </div>
+          </div>
+          <div class="migration-copy reveal">
+            <span class="eyebrow">Smooth migration</span>
+            <h2>Migrate at your own pace.</h2>
+            <p>
+              The migration adapter understands the familiar option names, callbacks, data-intro
+              attributes and step numbering. Start without a big refactor, then move to the native
+              API.
+            </p>
+            <div class="migration-command">
+              <code>import { introJs } from "tourkit/compat-introjs";</code
+              ><button
+                type="button"
+                data-copy='import { introJs } from "tourkit/compat-introjs";'
+                aria-label="Copy import"
+              >
+                <svg class="copy-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <rect x="6.5" y="6.5" width="9" height="9" rx="2" />
+                  <path
+                    d="M13.5 6.5V5A1.5 1.5 0 0 0 12 3.5H5A1.5 1.5 0 0 0 3.5 5v7A1.5 1.5 0 0 0 5 13.5h1.5"
+                  /></svg
+                ><svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="m4 10 4 4 8-9" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section final-cta-section">
+        <div class="container final-cta reveal">
+          <div class="cta-grid" aria-hidden="true"></div>
+          <div class="cta-glow" aria-hidden="true"></div>
+          <div>
+            <span class="eyebrow">Open source · MIT</span>
+            <h2>Make your users' first<br />experience unforgettable.</h2>
+          </div>
+          <div class="final-actions">
+            <a class="button button-primary button-large" href="../README.md"
+              >Get started with TourKit
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg
+            ></a>
+            <a
+              class="button button-secondary button-large"
+              href="https://github.com/deecalov/tourkit"
+              target="_blank"
+              rel="noreferrer"
+              >View on GitHub</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-main">
+        <div class="footer-brand">
+          <a class="brand" href="#top">
+            <svg class="brand-mark" viewBox="0 0 38 38" aria-hidden="true">
+              <path
+                d="M11.5 8.5h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15a3 3 0 0 1 3-3Z"
+              />
+              <path d="M14 14h10M14 19h7M14 24h4" />
+              <circle cx="25.5" cy="24" r="2.5" />
+            </svg>
+            <span>TourKit</span>
+          </a>
+          <p>Lightweight, accessible product tours for the modern web.</p>
+        </div>
+        <div class="footer-links">
+          <strong>Product</strong><a href="#features">Features</a><a href="#demo">Demo</a
+          ><a href="../CHANGELOG.md">Changelog</a>
+        </div>
+        <div class="footer-links">
+          <strong>For developers</strong><a href="../README.md">Documentation</a
+          ><a href="../demo/">Playground</a
+          ><a href="../README.md#migration-from-introjs">Migration</a>
+        </div>
+        <div class="footer-links">
+          <strong>Project</strong
+          ><a href="https://github.com/deecalov/tourkit" target="_blank" rel="noreferrer">GitHub</a
+          ><a href="../CONTRIBUTING.md">Contributing</a><a href="../LICENSE">MIT License</a>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© <span data-year>2026</span> TourKit. Released under MIT.</span>
+        <span class="footer-status"><i></i>All systems operational</span>
+        <span>Built for the open web.</span>
+      </div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast>Copied</div>
+  </body>
+</html>

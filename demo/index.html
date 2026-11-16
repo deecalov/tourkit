@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TourKit — demo</title>
+    <style>
+      :root {
+        --bg: #f6f8f9;
+        --surface: #ffffff;
+        --surface-glass: rgb(255 255 255 / 0.82);
+        --text: #1c2126;
+        --muted: #5f6b76;
+        --border: #dbe2e8;
+        --accent: #0d9488;
+        --accent-hover: #0f766e;
+        --accent-weak: rgb(13 148 136 / 0.09);
+        --glow: rgb(13 148 136 / 0.08);
+        --shadow-sm: 0 1px 2px rgb(18 26 33 / 0.05);
+        --shadow-md: 0 10px 28px rgb(18 26 33 / 0.1);
+        color-scheme: light;
+      }
+      body.dark {
+        --bg: #0c1013;
+        --surface: #14191e;
+        --surface-glass: rgb(20 25 30 / 0.82);
+        --text: #e8edf2;
+        --muted: #94a0ab;
+        --border: #2a323a;
+        --accent: #2dd4bf;
+        --accent-hover: #5eead4;
+        --accent-weak: rgb(45 212 191 / 0.1);
+        --glow: rgb(45 212 191 / 0.07);
+        --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+        --shadow-md: 0 12px 32px rgb(0 0 0 / 0.45);
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background:
+          radial-gradient(1100px 460px at 75% -12%, var(--glow), transparent 60%), var(--bg);
+        color: var(--text);
+        transition:
+          background 0.25s,
+          color 0.25s;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Sticky rather than fixed: when the row wraps on narrow screens the
+       header grows naturally and no content hides underneath it. */
+      header.topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 16px;
+        padding: 12px 24px;
+        background: var(--surface-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.01em;
+      }
+      .logo__mark {
+        width: 13px;
+        height: 13px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        box-shadow: 0 0 0 3px var(--accent-weak);
+      }
+      .topbar nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        margin-inline-start: auto;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 9px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          border-color 0.15s,
+          background-color 0.15s;
+        touch-action: manipulation;
+      }
+      .btn:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      body.dark .btn.primary {
+        color: #06231f;
+      }
+      .btn.primary:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 40px 24px 40vh;
+      }
+
+      /* Hero */
+      .hero {
+        padding: 28px 0 8px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 14px;
+        padding: 5px 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 550;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+      .hero h1 {
+        font-size: 38px;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin: 0 0 10px;
+      }
+      .hero h1 .accent {
+        color: var(--accent);
+      }
+      .hero p.lead {
+        color: var(--muted);
+        max-width: 590px;
+        font-size: 15.5px;
+        line-height: 1.6;
+        margin: 0;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+      }
+
+      /* Sections and cards */
+      .section-title {
+        margin: 44px 0 14px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          border-color 0.15s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+      }
+      .card__icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: var(--accent-weak);
+        color: var(--accent);
+        margin-bottom: 12px;
+      }
+      .card__icon svg {
+        width: 18px;
+        height: 18px;
+      }
+      .card h3 {
+        margin: 0 0 6px;
+        font-size: 15.5px;
+        letter-spacing: -0.01em;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      /* Callout with a stacking context (the transform is the point of the demo) */
+      .transformed {
+        margin-top: 40px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-inline-start: 3px solid var(--accent);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: var(--shadow-sm);
+        transform: translateZ(0) scale(1); /* creates a stacking context — the classic z-index trap */
+      }
+      .badge {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--accent-weak);
+        color: var(--accent);
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+      .transformed strong {
+        display: block;
+        margin-bottom: 4px;
+        letter-spacing: -0.01em;
+      }
+      .transformed p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .far {
+        margin-top: 60vh;
+      }
+
+      footer {
+        padding: 28px 24px 36px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 13px;
+        border-top: 1px solid var(--border);
+      }
+
+      /* Mobile layout */
+      @media (max-width: 560px) {
+        header.topbar {
+          padding: 10px 12px;
+          gap: 6px 10px;
+        }
+        .logo {
+          font-size: 15px;
+        }
+        .topbar nav {
+          gap: 6px 8px;
+        }
+        .topbar .btn {
+          padding: 8px 12px;
+          font-size: 13px;
+        }
+
+        main {
+          padding: 20px 16px 40vh;
+        }
+        .hero {
+          padding: 8px 0 4px;
+        }
+        .hero h1 {
+          font-size: 27px;
+        }
+        .hero p.lead {
+          font-size: 14px;
+        }
+
+        /* Scenario buttons: two per row, comfortable tap targets */
+        .actions {
+          gap: 8px;
+        }
+        .actions .btn {
+          flex: 1 1 calc(50% - 4px);
+          min-height: 44px;
+        }
+        .actions .btn.primary {
+          flex-basis: 100%;
+        }
+
+        .section-title {
+          margin: 28px 0 10px;
+        }
+        .grid {
+          gap: 10px;
+        }
+        .card {
+          padding: 16px;
+        }
+        .transformed {
+          margin-top: 28px;
+          padding: 16px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn,
+        .card {
+          transition: none;
+        }
+        .btn:hover,
+        .card:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="logo" id="logo"><span class="logo__mark" aria-hidden="true"></span>TourKit</span>
+      <nav>
+        <a class="btn" id="to-page2" href="./page2.html">Page 2</a>
+        <button
+          class="btn"
+          id="theme-toggle"
+          data-tour="Switches the app between the light and dark theme."
+          data-tour-title="Theme"
+          data-tour-step="4"
+        >
+          Theme
+        </button>
+        <button
+          class="btn"
+          id="profile"
+          data-tour="Your profile and account settings live here."
+          data-tour-title="Profile"
+          data-tour-placement="bottom-end"
+        >
+          Profile
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">MIT · 0 dependencies · ~9 KB</p>
+        <h1 id="hero-title"><span class="accent">TourKit</span> demo</h1>
+        <p class="lead">
+          A product tour library: an SVG spotlight instead of z-index hacks, viewport-based
+          positioning, accessibility built in and an MIT license. Start a tour and walk through it
+          with the arrow keys.
+        </p>
+        <div class="actions">
+          <button class="btn primary" id="start-js">Start tour (JS steps)</button>
+          <button class="btn" id="start-data" data-tour-trigger>Tour from data attributes</button>
+          <button class="btn" id="toggle-hints">Show hints</button>
+          <button class="btn" id="start-compat">Tour via intro.js compat</button>
+          <button class="btn" id="start-mp">Multi-page tour</button>
+          <button class="btn" id="start-async">Async target + advanceOn</button>
+          <button class="btn" id="spotlight-btn">Spotlight without a tour</button>
+          <button class="btn" id="start-modal">Modal + locked scroll</button>
+        </div>
+      </section>
+
+      <h2 class="section-title">Product capabilities</h2>
+      <section class="grid">
+        <div class="card" id="card-analytics">
+          <div class="card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+            </svg>
+          </div>
+          <h3>Analytics</h3>
+          <p>Product charts and metrics in real time.</p>
+        </div>
+        <div class="card" id="card-reports">
+          <div class="card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z" />
+              <path d="M14 3v5h5M9 13h6M9 17h6" />
+            </svg>
+          </div>
+          <h3>Reports</h3>
+          <p>Scheduled exports to Excel and PDF.</p>
+        </div>
+        <div class="card" id="card-team">
+          <div class="card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="9" cy="8" r="3.5" />
+              <path
+                d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5M16 5.5a3.5 3.5 0 0 1 0 7M21.5 20c-.5-2.1-1.8-3.6-3.5-4.4"
+              />
+            </svg>
+          </div>
+          <h3>Team</h3>
+          <p>Roles, invitations and access rights.</p>
+        </div>
+      </section>
+
+      <section
+        class="transformed"
+        id="transformed-box"
+        data-tour="This block sits inside a transform container (a stacking context). Classic z-index tours break here — the TourKit spotlight does not care."
+        data-tour-title="The hard case"
+        data-tour-step="3"
+      >
+        <span class="badge">transform · stacking context</span>
+        <strong>A block inside a transform container.</strong>
+        <p>Highlighting works because the element never has to be lifted above the overlay.</p>
+      </section>
+
+      <section
+        class="far card"
+        id="far-card"
+        data-tour="The page scrolled to this element on its own — it lives far below the fold."
+        data-tour-title="Auto-scroll"
+      >
+        <h3>An element far down the page</h3>
+        <p>Reaching it requires scrolling.</p>
+      </section>
+    </main>
+
+    <footer>TourKit demo · MIT</footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

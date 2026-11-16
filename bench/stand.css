@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  background: #f5f7fa;
+  color: #1c2430;
+  padding: 24px;
+}
+
+h1 {
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
+.bench-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1080px;
+}
+
+.bench-card {
+  background: #fff;
+  border: 1px solid #d8dee7;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 120px;
+}
+
+.bench-card h3 {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.bench-card p {
+  font-size: 13px;
+  color: #5d6673;
+}
+
+.bench-side {
+  position: fixed;
+  right: 8px;
+  top: 80px;
+  width: 160px;
+  height: 240px;
+  overflow-y: scroll;
+  background: #fff;
+  border: 1px solid #d8dee7;
+  border-radius: 8px;
+}
+
+.bench-side__pad {
+  height: 1900px;
+  background: linear-gradient(#ffffff, #e8edf3);
+}
+
+.bench-spacer {
+  height: 900px;
+}

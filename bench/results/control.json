@@ -1,0 +1,28 @@
+{
+  "library": "control",
+  "timestamp": "2026-07-22T09:21:43.635Z",
+  "scenarios": {
+    "scrollWindow": {
+      "counters": {
+        "layoutCount": 0,
+        "recalcStyleCount": 0,
+        "layoutDurationMs": 0,
+        "recalcStyleDurationMs": 0,
+        "scriptDurationMs": 1.18,
+        "taskDurationMs": 70.04,
+        "nodes": 0
+      }
+    },
+    "scrollSide": {
+      "counters": {
+        "layoutCount": 0,
+        "recalcStyleCount": 0,
+        "layoutDurationMs": 0,
+        "recalcStyleDurationMs": 0,
+        "scriptDurationMs": 1.47,
+        "taskDurationMs": 49.07,
+        "nodes": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit tests, package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - name: Embedded CSS module is in sync with styles.css
+        run: npm run gen:css && git diff --exit-code src/styles/css.generated.ts
+      - name: Unit tests with coverage thresholds
+        run: npm run test:coverage
+      - run: npm run build
+      - name: Bundle size budgets
+        run: npm run size
+      - name: Package health (publint + attw)
+        run: npm run lint:pkg
+      - name: Consumer smoke test (require/import from tarball)
+        run: npm run test:pack
+
+  e2e:
+    name: Playwright (chromium, firefox, webkit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      # The script-tag spec loads dist/*.global.js from disk.
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium firefox webkit
+      # Visual specs run automatically once linux baselines are committed
+      # (generate them with the "Update visual baselines" workflow).
+      - name: Playwright
+        run: |
+          if ls tests/e2e/visual.spec.ts-snapshots/*-linux.png >/dev/null 2>&1; then
+            npx playwright test
+          else
+            echo "No linux visual baselines yet — skipping visual specs."
+            npx playwright test --grep-invert visual
+          fi

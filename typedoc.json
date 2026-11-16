@@ -1,0 +1,18 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/index.ts",
+    "src/hints/index.ts",
+    "src/locales/index.ts",
+    "src/styles/inject.ts"
+  ],
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "out": "docs-site/api",
+  "docsRoot": "docs-site",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "disableSources": true,
+  "cleanOutputDir": true,
+  "hideBreadcrumbs": true
+}

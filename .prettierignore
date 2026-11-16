@@ -1,0 +1,16 @@
+dist/
+node_modules/
+coverage/
+test-results/
+site/
+docs-site/api/
+docs-site/.vitepress/cache/
+docs-site/.vitepress/dist/
+docs-site/.vitepress/.temp/
+.playwright-mcp/
+demo/dist/
+playwright-report/
+blob-report/
+package-lock.json
+CHANGELOG.md
+src/styles/css.generated.ts

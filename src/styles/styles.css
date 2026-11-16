@@ -1,0 +1,673 @@
+/*!
+ * TourKit | MIT License
+ * BEM blocks, themable via CSS custom properties.
+ *
+ * Default look: light surface with a teal accent (matches light host pages).
+ * A dark graphite variant is available via `theme: "dark"`; `theme: "auto"`
+ * follows prefers-color-scheme.
+ *
+ * The version is intentionally absent here: scripts/copy-styles.mjs stamps it
+ * into dist/styles.css at build time. Keeping the source free of it means the
+ * committed css.generated.ts (embedded for `tourkit/inject-styles`) never
+ * drifts when the package version is bumped.
+ */
+
+.tk-root {
+  --tk-z: 99999;
+  --tk-overlay-color: #05070a;
+  --tk-overlay-opacity: 0.5;
+  --tk-radius: 14px;
+
+  /* Surface & text (default: light — matches light host pages).
+     Contrast: muted ≥ 4.5:1 on white, white on accent ≥ 4.5:1 (axe serious). */
+  --tk-surface: #ffffff;
+  --tk-text: #181b20;
+  --tk-text-secondary: #454b55;
+  --tk-text-muted: #5d6673;
+  --tk-border: rgb(24 27 32 / 0.1);
+  --tk-bullet: rgb(24 27 32 / 0.18);
+  --tk-shadow:
+    0 0 0 1px rgb(24 27 32 / 0.06), 0 16px 40px rgb(24 27 32 / 0.16),
+    0 4px 12px rgb(24 27 32 / 0.08);
+
+  /* Accent: teal — intentionally not the generic "AI purple/blue" */
+  --tk-accent: #0f766e;
+  --tk-accent-hover: #115e59;
+  --tk-accent-contrast: #ffffff;
+  --tk-glow: rgb(15 118 110 / 0.3);
+
+  /* Spotlight ring: transparent in the light theme (clean look);
+     the dark theme brightens it for a stronger highlight. */
+  --tk-spotlight-ring: transparent;
+  --tk-spotlight-ring-width: 0;
+  --tk-spotlight-glow: transparent;
+
+  --tk-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tk-tooltip-max-width: 360px;
+  --tk-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--tk-z);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--tk-transition);
+  font-family: var(--tk-font);
+}
+
+.tk-root,
+.tk-root * {
+  box-sizing: border-box;
+}
+
+.tk-root--visible {
+  opacity: 1;
+}
+
+/* Dark variant (graphite + teal): for dark host pages — `theme: "dark"`.
+   `theme: "light"` needs no rules: light is the default.
+   Keep in sync with the `theme: "auto"` dark half below. */
+.tk-root[data-tk-theme="dark"] {
+  --tk-surface: #15171c;
+  --tk-text: #f4f6f9;
+  --tk-text-secondary: #c3cad6;
+  --tk-text-muted: #8f98a6;
+  --tk-border: rgb(255 255 255 / 0.1);
+  --tk-bullet: rgb(255 255 255 / 0.24);
+  --tk-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.07), 0 16px 40px rgb(0 0 0 / 0.45), 0 4px 12px rgb(0 0 0 / 0.35);
+  --tk-accent: #2dd4bf;
+  --tk-accent-hover: #5eead4;
+  --tk-accent-contrast: #06231f;
+  --tk-glow: rgb(45 212 191 / 0.45);
+
+  /* Stronger dimming + a bright glowing ring around the highlighted element */
+  --tk-overlay-opacity: 0.68;
+  --tk-spotlight-ring: rgb(94 234 212 / 0.9);
+  --tk-spotlight-ring-width: 2px;
+  --tk-spotlight-glow: rgb(45 212 191 / 0.55);
+}
+
+/* Auto theme: follows the OS preference (light stays the default look). */
+@media (prefers-color-scheme: dark) {
+  .tk-root[data-tk-theme="auto"] {
+    --tk-surface: #15171c;
+    --tk-text: #f4f6f9;
+    --tk-text-secondary: #c3cad6;
+    --tk-text-muted: #8f98a6;
+    --tk-border: rgb(255 255 255 / 0.1);
+    --tk-bullet: rgb(255 255 255 / 0.24);
+    --tk-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.07), 0 16px 40px rgb(0 0 0 / 0.45), 0 4px 12px rgb(0 0 0 / 0.35);
+    --tk-accent: #2dd4bf;
+    --tk-accent-hover: #5eead4;
+    --tk-accent-contrast: #06231f;
+    --tk-glow: rgb(45 212 191 / 0.45);
+
+    --tk-overlay-opacity: 0.68;
+    --tk-spotlight-ring: rgb(94 234 212 / 0.9);
+    --tk-spotlight-ring-width: 2px;
+    --tk-spotlight-glow: rgb(45 212 191 / 0.55);
+  }
+}
+
+/* ---------------------------------- Overlay -------------------------------- */
+
+.tk-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Only the painted (dimmed) area receives clicks; the cutout lets events through. */
+.tk-overlay__path {
+  pointer-events: auto;
+  fill: var(--tk-overlay-color);
+  fill-opacity: var(--tk-overlay-opacity);
+}
+
+/* Themable outline of the spotlight cutouts (bright in the dark theme). */
+.tk-overlay__ring {
+  pointer-events: none;
+  fill: none;
+  stroke: var(--tk-spotlight-ring);
+  stroke-width: var(--tk-spotlight-ring-width);
+  filter: drop-shadow(0 0 6px var(--tk-spotlight-glow));
+}
+
+.tk-interaction-guard {
+  position: fixed;
+  pointer-events: auto;
+}
+
+/* ---------------------------------- Tooltip -------------------------------- */
+
+.tk-tooltip {
+  position: fixed;
+  pointer-events: auto;
+  /* Never wider than the viewport minus the solver's 8px side padding —
+     keeps narrow phones (320-390px) from overflowing. */
+  max-width: min(var(--tk-tooltip-max-width), calc(100vw - 16px));
+  min-width: min(260px, calc(100vw - 16px));
+  /* Same guarantee vertically: a long step on a short viewport must never
+     push its header (title + close) off screen. The content area scrolls
+     instead — see .tk-tooltip__content. */
+  max-height: calc(100dvh - 16px);
+  background: var(--tk-surface);
+  color: var(--tk-text);
+  border-radius: var(--tk-radius);
+  box-shadow: var(--tk-shadow);
+  outline: none;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.tk-tooltip__arrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: var(--tk-surface);
+  transform: rotate(45deg);
+}
+
+/* The side names where the tooltip sits relative to the target,
+   so the arrow attaches to the opposite edge of the tooltip. */
+.tk-tooltip__arrow[data-side="bottom"] {
+  top: -7px;
+}
+.tk-tooltip__arrow[data-side="top"] {
+  bottom: -7px;
+}
+.tk-tooltip__arrow[data-side="right"] {
+  left: -7px;
+}
+.tk-tooltip__arrow[data-side="left"] {
+  right: -7px;
+}
+
+/* Column layout so the content can shrink while header, meta row and footer
+   keep their intrinsic height. `overflow` stays on the content: the arrow is
+   an absolutely positioned sibling that sticks out of the tooltip box and
+   would be clipped by a scroll container on .tk-tooltip itself. */
+.tk-tooltip__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  border-radius: inherit;
+  background: inherit;
+}
+
+/* Everything except the content keeps its intrinsic height when the tooltip
+   hits its max-height — only the content scrolls. */
+.tk-tooltip__header,
+.tk-tooltip__once,
+.tk-tooltip__step-number,
+.tk-tooltip__progress,
+.tk-tooltip__footer {
+  flex-shrink: 0;
+}
+
+.tk-tooltip__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 18px 0;
+  min-height: 22px;
+}
+
+.tk-tooltip__title {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.tk-tooltip__close {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  width: 28px;
+  height: 28px;
+  margin-top: -5px;
+  margin-inline-end: -9px;
+  border: none;
+  background: transparent;
+  color: var(--tk-text-muted);
+  font-size: 19px;
+  line-height: 1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color var(--tk-transition),
+    color var(--tk-transition);
+}
+
+.tk-tooltip__close:hover {
+  color: var(--tk-text);
+  background: rgb(128 128 128 / 0.16);
+}
+
+.tk-tooltip__close:focus-visible {
+  outline: 2px solid var(--tk-accent);
+  outline-offset: 1px;
+}
+
+.tk-tooltip__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 18px 16px;
+  color: var(--tk-text-secondary);
+}
+
+.tk-tooltip__header:has(+ .tk-tooltip__content:empty) {
+  padding-bottom: 16px;
+}
+
+.tk-tooltip__once {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 12px;
+  font-size: 12.5px;
+  color: var(--tk-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tk-tooltip__once:hover {
+  color: var(--tk-text-secondary);
+}
+
+.tk-tooltip__once-box {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--tk-accent);
+}
+
+.tk-tooltip__step-number {
+  padding: 0 18px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tk-text-muted);
+}
+
+/* Segmented progress: one segment per step. Completed segments are dimmed
+   accent, the current one is a glowing gradient that sweeps in — reads as
+   discrete steps rather than an intro.js-style continuous bar. */
+.tk-tooltip__progress {
+  display: flex;
+  gap: 3px;
+  margin: 0 18px 12px;
+  height: 4px;
+}
+
+.tk-tooltip__progress-seg {
+  flex: 1;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tk-bullet);
+  transition:
+    background-color var(--tk-transition),
+    opacity var(--tk-transition);
+}
+
+.tk-tooltip__progress-seg--done {
+  background: var(--tk-accent);
+  opacity: 0.45;
+}
+
+.tk-tooltip__progress-seg--current {
+  background: linear-gradient(90deg, var(--tk-accent), var(--tk-accent-hover));
+  box-shadow: 0 0 10px var(--tk-glow);
+  transform-origin: left;
+  animation:
+    tk-seg-fill 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    tk-seg-glow 2.2s ease-in-out 280ms infinite alternate;
+}
+
+@keyframes tk-seg-fill {
+  from {
+    transform: scaleX(0.25);
+    opacity: 0.4;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tk-seg-glow {
+  from {
+    box-shadow: 0 0 4px var(--tk-glow);
+  }
+  to {
+    box-shadow: 0 0 12px var(--tk-glow);
+  }
+}
+
+.tk-tooltip__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 12px;
+  /* Narrow screens: bullets and action buttons stack instead of squeezing. */
+  flex-wrap: wrap;
+  padding: 12px 18px 14px;
+  border-top: 1px solid var(--tk-border);
+}
+
+/* ------------------------------ Bullets (crumbs) --------------------------- */
+
+.tk-tooltip__bullets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 26px;
+}
+
+.tk-tooltip__bullet {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--tk-bullet);
+  color: transparent;
+  font: inherit;
+  font-size: 0;
+  cursor: pointer;
+  transition:
+    width var(--tk-transition),
+    height var(--tk-transition),
+    background-color var(--tk-transition),
+    color var(--tk-transition),
+    font-size var(--tk-transition);
+}
+
+/* Invisible padding extends the hit target of small dots to ~24px. */
+.tk-tooltip__bullet::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}
+
+.tk-tooltip__bullet:hover {
+  background: var(--tk-text-muted);
+}
+
+/* Active crumb: a large circle with the step number inside. */
+.tk-tooltip__bullet--active {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-accent);
+  color: var(--tk-accent-contrast);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: default;
+}
+
+.tk-tooltip__bullet--active:hover {
+  background: var(--tk-accent);
+}
+
+.tk-tooltip__bullet:focus-visible {
+  outline: 2px solid var(--tk-accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------- Buttons -------------------------------- */
+
+.tk-tooltip__actions {
+  display: flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.tk-button {
+  padding: 7px 14px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background-color var(--tk-transition),
+    border-color var(--tk-transition);
+}
+
+.tk-button:focus-visible {
+  outline: 2px solid var(--tk-accent);
+  outline-offset: 1px;
+}
+
+.tk-button--primary {
+  background: var(--tk-accent);
+  color: var(--tk-accent-contrast);
+}
+
+.tk-button--primary:hover:not([disabled]) {
+  background: var(--tk-accent-hover);
+}
+
+.tk-button--ghost {
+  background: transparent;
+  border-color: var(--tk-border);
+  color: var(--tk-text);
+  font-weight: 500;
+}
+
+.tk-button--ghost:hover:not([disabled]) {
+  background: rgb(128 128 128 / 0.12);
+}
+
+.tk-button[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ----------------------------------- Hints --------------------------------- */
+
+.tk-hint {
+  position: fixed;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--tk-accent);
+  box-shadow: 0 0 0 3px var(--tk-glow);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.tk-hint__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.5;
+  animation: tk-hint-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes tk-hint-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.tk-hint--hidden {
+  display: none;
+}
+
+.tk-hint:focus-visible {
+  outline: 2px solid var(--tk-accent);
+  outline-offset: 3px;
+}
+
+/* Invisible padding: expands the 18px marker to a ~38px hit target. */
+.tk-hint::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+}
+
+.tk-hint-popover {
+  position: fixed;
+  pointer-events: auto;
+  max-width: 300px;
+  min-width: 200px;
+  padding: 12px 14px;
+  background: var(--tk-surface);
+  color: var(--tk-text-secondary);
+  border-radius: var(--tk-radius);
+  box-shadow: var(--tk-shadow);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.tk-hint-popover__button {
+  margin-top: 10px;
+}
+
+/* --------------------------------- Live region ----------------------------- */
+
+.tk-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------ Touch ergonomics --------------------------- */
+
+@media (pointer: coarse) {
+  .tk-button {
+    padding: 10px 16px;
+  }
+
+  .tk-tooltip__close {
+    width: 36px;
+    height: 36px;
+    margin-top: -8px;
+  }
+
+  .tk-tooltip__bullet::after {
+    inset: -9px;
+  }
+
+  .tk-hint {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* ------------------- Forced colors (Windows High Contrast) ----------------- */
+
+@media (forced-colors: active) {
+  /* box-shadow is stripped in forced-colors mode — borders take over. */
+  .tk-tooltip,
+  .tk-hint-popover {
+    border: 1px solid CanvasText;
+  }
+
+  /* The arrow is a borderless rotated square; without its shadow it degrades
+     into a floating blob. The spotlight ring keeps pointing at the target. */
+  .tk-tooltip__arrow {
+    display: none;
+  }
+
+  /* Keep the dimming translucent: forced fills are opaque, but fill-opacity
+     is not on the forced list — an explicit pair preserves the see-through
+     scrim in both HC palettes. */
+  .tk-overlay__path {
+    forced-color-adjust: none;
+    fill: CanvasText;
+    fill-opacity: 0.4;
+  }
+
+  .tk-overlay__ring {
+    forced-color-adjust: none;
+    stroke: Highlight;
+    stroke-width: 3px;
+    filter: none;
+  }
+
+  .tk-button {
+    border: 1px solid ButtonText;
+  }
+
+  /* Color-only state indicators get explicit system colors. */
+  .tk-tooltip__bullet,
+  .tk-tooltip__progress-seg {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    border: 1px solid ButtonText;
+  }
+
+  .tk-tooltip__bullet--active,
+  .tk-tooltip__progress-seg--done,
+  .tk-tooltip__progress-seg--current {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .tk-tooltip__progress-seg--current {
+    box-shadow: none;
+    animation: none;
+  }
+
+  .tk-hint {
+    border: 2px solid ButtonText;
+  }
+
+  .tk-hint__pulse {
+    display: none;
+  }
+}
+
+/* ------------------------------- Reduced motion ---------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-root,
+  .tk-tooltip__progress-seg,
+  .tk-tooltip__bullet,
+  .tk-tooltip__close,
+  .tk-button {
+    transition: none;
+  }
+
+  .tk-tooltip__progress-seg--current,
+  .tk-hint__pulse {
+    animation: none;
+  }
+}

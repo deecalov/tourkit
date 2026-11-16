@@ -1,0 +1,92 @@
+{
+  "library": "driverjs",
+  "version": "1.8.0",
+  "timestamp": "2026-07-22T09:22:02.966Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+  "params": {
+    "targets": 40,
+    "steps": 12,
+    "scrollFrames": 120,
+    "scrollStepPx": 24,
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "reducedMotion": true
+  },
+  "scenarios": {
+    "start": {
+      "ms": 41.8,
+      "counters": {
+        "layoutCount": 5,
+        "recalcStyleCount": 10,
+        "layoutDurationMs": 20.33,
+        "recalcStyleDurationMs": 14.27,
+        "scriptDurationMs": 0.91,
+        "taskDurationMs": 46.74,
+        "nodes": 31
+      }
+    },
+    "next": {
+      "meanMs": 32.54,
+      "medianMs": 32.2,
+      "maxMs": 40.2,
+      "samples": [25.8, 31.4, 40.2, 27.2, 32.2, 35.5, 35, 30.3, 33, 36.2, 31.1],
+      "counters": {
+        "layoutCount": 74,
+        "recalcStyleCount": 107,
+        "layoutDurationMs": 15.41,
+        "recalcStyleDurationMs": 21.86,
+        "scriptDurationMs": 3.54,
+        "taskDurationMs": 78.41,
+        "nodes": 319
+      }
+    },
+    "scrollWindow": {
+      "totalMs": 2006.1,
+      "counters": {
+        "layoutCount": 480,
+        "recalcStyleCount": 490,
+        "layoutDurationMs": 28.22,
+        "recalcStyleDurationMs": 24.78,
+        "scriptDurationMs": 38.82,
+        "taskDurationMs": 221.22,
+        "nodes": 0
+      }
+    },
+    "scrollSide": {
+      "totalMs": 2005,
+      "counters": {
+        "layoutCount": 0,
+        "recalcStyleCount": 0,
+        "layoutDurationMs": 0,
+        "recalcStyleDurationMs": 0,
+        "scriptDurationMs": 1.23,
+        "taskDurationMs": 56.42,
+        "nodes": 0
+      }
+    },
+    "nestedTracking": {
+      "samples": 40,
+      "settledErrorPx": 0,
+      "meanErrorPx": 8,
+      "maxErrorPx": 16,
+      "counters": {
+        "layoutCount": 2,
+        "recalcStyleCount": 14,
+        "layoutDurationMs": 0.12,
+        "recalcStyleDurationMs": 0.89,
+        "scriptDurationMs": 0.98,
+        "taskDurationMs": 60.95,
+        "nodes": 2
+      }
+    }
+  },
+  "memory": {
+    "heapBaselineBytes": 1343412,
+    "heapActiveBytes": 2340076,
+    "heapAfterExitBytes": 2330628,
+    "nodesActive": 271,
+    "nodesAfterExit": 237
+  }
+}

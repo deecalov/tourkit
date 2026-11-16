@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in TourKit behaves incorrectly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report. A minimal reproduction
+        (CodeSandbox, StackBlitz or a plain HTML file) gets a fix much faster
+        than a description alone.
+
+  - type: input
+    id: version
+    attributes:
+      label: TourKit version
+      placeholder: "0.7.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: entry
+    attributes:
+      label: Entry point
+      options:
+        - tourkit (core)
+        - tourkit/hints
+        - tourkit/compat-introjs
+        - tourkit/locales
+        - tourkit/inject-styles
+        - script tag (global build)
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and OS
+      placeholder: "Chrome 140 on Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Include console output if there is any.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: A link, or the tour options and the relevant markup.
+      render: ts
+    validations:
+      required: true
