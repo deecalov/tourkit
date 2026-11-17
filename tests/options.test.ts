@@ -30,6 +30,38 @@ describe("options", () => {
     expect(merged.labels.back).toBe("Back");
   });
 
+  it("an explicit undefined does not erase an option that has a default", () => {
+    // Wrappers forward unset props verbatim: `{ placement: props.placement }`.
+    const merged = mergeOptions(getDefaultOptions(), {
+      steps: undefined,
+      placement: undefined,
+      keyboard: undefined,
+      labels: { next: undefined, back: "Prev" },
+      buttons: { next: undefined },
+      overlay: { padding: undefined },
+      scroll: { block: undefined },
+      waitForTarget: { timeoutMs: undefined },
+    });
+
+    expect(merged.steps).toEqual([]);
+    expect(merged.placement).toBe("bottom");
+    expect(merged.keyboard).toBe(true);
+    expect(merged.labels.next).toBe("Next");
+    expect(merged.labels.back).toBe("Prev");
+    expect(merged.buttons.next).toBe(true);
+    expect(merged.overlay.padding).toBe(8);
+    expect(merged.scroll.block).toBe("center");
+    expect(merged.waitForTarget).toEqual({ timeoutMs: 10000, onTimeout: "float" });
+  });
+
+  it("undefined still clears an optional option (setOptions({ theme: undefined }))", () => {
+    const themed = mergeOptions(getDefaultOptions(), { theme: "dark", zIndex: 5 });
+    const cleared = mergeOptions(themed, { theme: undefined, zIndex: undefined });
+
+    expect(cleared.theme).toBeUndefined();
+    expect(cleared.zIndex).toBeUndefined();
+  });
+
   it("does not mutate the base options", () => {
     const base = getDefaultOptions();
     mergeOptions(base, { overlay: { opacity: 0.9 } });

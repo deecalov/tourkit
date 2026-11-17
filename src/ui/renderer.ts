@@ -4,8 +4,8 @@ import type { Direction, StepContext, TourOptions, WaitForTargetOptions } from "
 import { createAutoUpdater, type AutoUpdater } from "../geometry/autoUpdate";
 import { inflate, rectsEqual, targetRect, viewportRect, type Rect } from "../geometry/rect";
 import { scrollTargetIntoView } from "../geometry/scrollIntoView";
-import { caf, h, prefersReducedMotion, raf } from "./dom";
-import { rememberFocus } from "./focus";
+import { caf, h, inHintPopover, prefersReducedMotion, raf } from "./dom";
+import { activeElement, rememberFocus } from "./focus";
 import { acquireHostClass, TOUR_ACTIVE_CLASS } from "./hostFlags";
 import { SpotlightOverlay } from "./overlay";
 import { lockDocumentScroll } from "./scrollLock";
@@ -40,6 +40,17 @@ function isEditableControl(el: Element | null): boolean {
   );
 }
 
+/** ARIA composite widgets that move their own selection with arrows / Home / End. */
+const ARROW_WIDGETS = "slider spinbutton listbox radiogroup tablist menu menubar grid tree"
+  .split(" ")
+  .map((role) => `[role=${role}]`)
+  .join();
+
+/** Focus sits in a control that uses the navigation keys itself. */
+function ownsNavigationKeys(el: Element | null): boolean {
+  return isEditableControl(el) || el?.closest(ARROW_WIDGETS) != null;
+}
+
 /**
  * DOM side of the tour: mounts a single fixed, pointer-transparent root
  * with the spotlight overlay, the tooltip, an optional interaction guard
@@ -72,6 +83,12 @@ export class TourRenderer implements EngineDelegate {
   private _releaseScrollLock: (() => void) | null = null;
   /** Removes the `tk-tour-active` body flag; null when the flag is not held. */
   private _releaseHostClass: (() => void) | null = null;
+  /**
+   * Bumped by destroyNow(). An unmount() still waiting for its fade-out when
+   * the tour is destroyed (and possibly started again) must not remove the
+   * DOM of the newer run when the timer finally fires.
+   */
+  private _generation = 0;
 
   constructor(
     private _options: TourOptions,
@@ -217,6 +234,7 @@ export class TourRenderer implements EngineDelegate {
   async unmount(): Promise<void> {
     const root = this._root;
     if (!root) return;
+    const generation = this._generation;
 
     this._teardownListeners();
 
@@ -225,6 +243,9 @@ export class TourRenderer implements EngineDelegate {
       await new Promise<void>((resolve) => setTimeout(resolve, EXIT_FADE_MS));
     }
 
+    // destroyNow() ran during the fade: it already removed this root and
+    // restored focus, and whatever is mounted now belongs to a newer run.
+    if (generation !== this._generation) return;
     this._removeDom();
     this._restoreFocus?.();
     this._restoreFocus = null;
@@ -232,6 +253,7 @@ export class TourRenderer implements EngineDelegate {
 
   /** Synchronous teardown without animations (destroy()). */
   destroyNow(): void {
+    this._generation += 1;
     this._teardownListeners();
     this._removeDom();
     this._restoreFocus?.();
@@ -448,12 +470,19 @@ export class TourRenderer implements EngineDelegate {
         this._sync();
       });
     });
-    observer.observe(document.body, {
+    const observeOptions: MutationObserverInit = {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ["style", "class", "hidden"],
-    });
+    };
+    observer.observe(document.body, observeOptions);
+    // `subtree` on document.body stops at the shadow boundary, so a scoped
+    // ShadowRoot (or detached subtree) must be observed directly as well.
+    const scope = this._options.root;
+    if (scope && scope !== document && !document.body.contains(scope)) {
+      observer.observe(scope, observeOptions);
+    }
 
     const timer = window.setTimeout(() => {
       const skip = policy.onTimeout === "skip";
@@ -579,7 +608,7 @@ export class TourRenderer implements EngineDelegate {
     if (!this._options.keyboard && !this._options.exitOnEsc) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      const focusTarget = document.activeElement;
+      const focusTarget = activeElement();
       const inTour = this._root?.contains(focusTarget) ?? false;
 
       if (e.key === "Escape") {
@@ -593,6 +622,8 @@ export class TourRenderer implements EngineDelegate {
         // clear the field) — closing the tour on top of that is hostile.
         // Inside the tour UI Esc keeps the dialog semantics and exits.
         if (!inTour && isEditableControl(focusTarget)) return;
+        // A hint popover opened above the step owns this Esc.
+        if (inHintPopover(focusTarget)) return;
         e.preventDefault();
         this._hooks.onExitRequest();
         return;
@@ -604,6 +635,9 @@ export class TourRenderer implements EngineDelegate {
       // body — never hijack typing in the host application's inputs.
       const onBody = focusTarget === document.body || focusTarget === null;
       if (!inTour && !onBody) return;
+      // Interactive step content (renderStep forms, sliders, selects) keeps
+      // its caret and selection keys; the tour's own buttons still navigate.
+      if (ownsNavigationKeys(focusTarget)) return;
 
       switch (e.key) {
         case "ArrowRight":

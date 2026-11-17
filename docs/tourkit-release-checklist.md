@@ -237,3 +237,23 @@ The subsequent `v0.7.1` release published `sitetourkit@0.7.1` with GitHub Action
 provenance on 2026-11-16. Its CI, CodeQL and release workflow passed. The npm
 tarball's integrity and contents were verified against the reviewed build.
 Downloads are available from the [GitHub Release](https://github.com/deecalov/tourkit/releases/tag/v0.7.1).
+
+## Release 0.7.2 validation: 2026-11-17
+
+Validated locally on Windows with Node.js 22.23.0 and npm 10.8.2 after `npm ci`:
+
+| Check                                             | Result                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Lint, formatting, typecheck, embedded CSS in sync | Passed                                                                                                 |
+| Unit tests and coverage                           | 383 passed in 42 files; 97.89% statements/lines, 91.80% branches, 93.71% functions                     |
+| Library build and bundle budgets                  | Passed; budgets raised to 11.5 kB for core (actual 11.29) and 12 kB for `index.global.js` (11.49)      |
+| Package validation and packed consumer smoke test | Passed for ESM, CJS, CSS and global entries; the reviewed tarball has the same 31-file layout as 0.7.1 |
+| Site build                                        | Passed; the known TypeDoc `HintOpenOptions` warning remains                                            |
+| Playwright suite                                  | 116 passed; 6 expected skips (forced colors and the scrollbar-dependent check outside Chromium)        |
+| npm dry-run of the reviewed tarball               | Passed                                                                                                 |
+
+Two new browser specs cover behavior jsdom cannot model: `tests/e2e/shadow.spec.ts`
+(a target mounted late inside a scoped `ShadowRoot`; jsdom reports shadow-tree
+mutations to an observer on `document.body`, browsers do not) and
+`tests/e2e/scroll.spec.ts` (nested scrollers, sticky headers and
+`scrollbar-gutter`). The scrolling spec loads `dist`, so build before running it.

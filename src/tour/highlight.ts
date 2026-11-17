@@ -1,10 +1,11 @@
 import { resolveTarget } from "../core/engine";
-import { getDefaultOptions } from "../core/options";
+import { definedOnly, getDefaultOptions } from "../core/options";
 import type { OverlayOptions, ScrollOptions, TargetRef } from "../core/types";
 import { createAutoUpdater, type AutoUpdater } from "../geometry/autoUpdate";
 import { inflate, targetRect, type Rect } from "../geometry/rect";
 import { scrollTargetIntoView } from "../geometry/scrollIntoView";
-import { h, raf } from "../ui/dom";
+import { h, inHintPopover, raf } from "../ui/dom";
+import { activeElement } from "../ui/focus";
 import { acquireHostClass, HIGHLIGHT_ACTIVE_CLASS } from "../ui/hostFlags";
 import { SpotlightOverlay } from "../ui/overlay";
 
@@ -72,9 +73,9 @@ export function highlight(target: TargetRef, options: HighlightOptions = {}): Hi
   }
 
   const defaults = getDefaultOptions();
-  const overlayOptions: OverlayOptions = { ...defaults.overlay, ...options.overlay };
+  const overlayOptions: OverlayOptions = { ...defaults.overlay, ...definedOnly(options.overlay) };
   const scrollOptions: ScrollOptions | false =
-    options.scroll === false ? false : { ...defaults.scroll, ...options.scroll };
+    options.scroll === false ? false : { ...defaults.scroll, ...definedOnly(options.scroll) };
   const exitOnEsc = options.exitOnEsc ?? true;
 
   let currentTarget: TargetRef = target;
@@ -116,7 +117,8 @@ export function highlight(target: TargetRef, options: HighlightOptions = {}): Hi
   const onKeyDown = (e: KeyboardEvent) => {
     // Esc the host already consumed (its own dialog) must not also kill the
     // spotlight — see the same guard in the tour renderer.
-    if (e.key === "Escape" && exitOnEsc && !e.defaultPrevented) {
+    // A hint popover above the spotlight owns the Esc as well.
+    if (e.key === "Escape" && exitOnEsc && !e.defaultPrevented && !inHintPopover(activeElement())) {
       e.preventDefault();
       api.destroy();
     }

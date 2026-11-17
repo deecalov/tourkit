@@ -13,18 +13,23 @@ npm run dev          # vite demo with live reload
 ## Checks to run before a PR
 
 ```bash
-npm run typecheck    # tsc --noEmit (strict)
-npm run lint         # eslint
-npm run format:check # prettier
-npm test             # vitest (jsdom) unit/integration tests
-npm run test:e2e     # Playwright (chromium/firefox/webkit; installs via npx playwright install)
-npm run build        # tsup -> dist (ESM/CJS/IIFE + d.ts + styles.css)
-npm run size         # size-limit bundle budgets
-npm run lint:pkg     # publint + Are The Types Wrong on the packed tarball
-npm run test:pack    # smoke test: require()/import of every entry from the packed tarball
+npm run typecheck     # tsc --noEmit (strict)
+npm run lint          # eslint
+npm run format:check  # prettier
+npm run test:coverage # vitest (jsdom) unit/integration tests + coverage thresholds
+npm run build         # tsup -> dist (ESM/CJS/IIFE + d.ts + styles.css)
+npm run test:e2e      # Playwright (chromium/firefox/webkit; installs via npx playwright install)
+npm run size          # size-limit bundle budgets
+npm run lint:pkg      # publint + Are The Types Wrong on the packed tarball
+npm run test:pack     # smoke test: require()/import of every entry from the packed tarball
 ```
 
-CI runs the same set on every push/PR.
+CI runs the same set on every push/PR. Build before the e2e suite: the
+script-tag and scrolling specs load the bundles from `dist`, so a stale build
+tests old code. On Windows, run coverage through `npm run test:coverage`
+rather than `vitest --coverage` directly — the script upper-cases the drive
+letter, without which a working directory spelled `e:\` makes Vitest count
+every file twice and fail the thresholds.
 
 ## Ground rules
 
@@ -42,6 +47,11 @@ CI runs the same set on every push/PR.
   `src/core/types.ts`, a test, and a mention in the docs (`docs/` and the
   README where relevant).
 - Behavioral changes require a CHANGELOG entry.
+- Layout, scrollbars and shadow DOM need a Playwright spec, not only a unit
+  test: jsdom reports shadow-tree mutations to an observer on `document.body`
+  (browsers do not), keeps the `scroll-margin` and `overflow` shorthands
+  apart from their longhands, and has no layout at all. A unit test of such
+  behaviour can pass against code that is broken in every browser.
 
 ## Commit / PR style
 

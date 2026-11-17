@@ -4,6 +4,9 @@
  */
 interface TourHandle {
   start: () => Promise<boolean>;
+  exit: (force?: boolean) => Promise<boolean>;
+  destroy: () => void;
+  readonly isActive: boolean;
 }
 
 declare var TourKit: {

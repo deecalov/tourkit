@@ -56,6 +56,23 @@ describe("lockScroll", () => {
     expect(html().style.paddingRight).toBe("");
   });
 
+  it("does not compensate when the page reserves the gutter (scrollbar-gutter: stable)", async () => {
+    vi.stubGlobal("innerWidth", 1015);
+    vi.spyOn(html(), "clientWidth", "get").mockReturnValue(1000);
+    html().style.setProperty("scrollbar-gutter", "stable");
+
+    const tour = mountTour({ lockScroll: true, steps: [{ content: "one" }] });
+    await tour.start();
+
+    // The gutter stays reserved under overflow: hidden — extra padding would
+    // shift the layout by the scrollbar width in the other direction.
+    expect(locked()).toBe(true);
+    expect(html().style.paddingRight).toBe("");
+
+    await tour.exit(true);
+    html().style.removeProperty("scrollbar-gutter");
+  });
+
   it("follows a per-step override in both directions", async () => {
     const tour = mountTour({
       steps: [{ content: "free" }, { content: "locked", lockScroll: true }, { content: "free" }],

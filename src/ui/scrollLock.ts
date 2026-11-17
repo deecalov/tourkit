@@ -17,9 +17,13 @@ export function lockDocumentScroll(): () => void {
 
   const previousOverflow = el.style.overflow;
   const previousPadding = el.style.paddingRight;
+  const computed = getComputedStyle(el);
 
-  if (scrollbar > 0) {
-    const current = parseFloat(getComputedStyle(el).paddingRight) || 0;
+  // `scrollbar-gutter: stable` keeps the gutter reserved under overflow:
+  // hidden; compensating as well would shift the layout the other way.
+  const stableGutter = computed.getPropertyValue("scrollbar-gutter").includes("stable");
+  if (scrollbar > 0 && !stableGutter) {
+    const current = parseFloat(computed.paddingRight) || 0;
     el.style.paddingRight = `${current + scrollbar}px`;
   }
   el.style.overflow = "hidden";

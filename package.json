@@ -1,6 +1,6 @@
 {
   "name": "sitetourkit",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Lightweight, dependency-free product tours and onboarding walkthroughs. MIT-licensed, accessible, framework-agnostic.",
   "keywords": [
     "tour",
@@ -118,7 +118,7 @@
     "demo": "vite demo",
     "landing": "npm run build && vite --open /landing/",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "node scripts/test-coverage.mjs",
     "test:e2e": "playwright test",
     "bench": "playwright test -c playwright.bench.config.ts",
     "typecheck": "tsc --noEmit",
@@ -133,7 +133,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "11 KB"
+      "limit": "11.5 KB"
     },
     {
       "path": "dist/hints.js",
@@ -149,7 +149,7 @@
     },
     {
       "path": "dist/index.global.js",
-      "limit": "11.5 KB"
+      "limit": "12 KB"
     },
     {
       "path": "dist/hints.global.js",

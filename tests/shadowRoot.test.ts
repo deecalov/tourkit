@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveTarget } from "../src/core/engine";
 import { fromDataAttributes } from "../src/tour/steps";
 import { fakeRect, mountHints, mountTour, overlayPath, withRect } from "./helpers";
@@ -74,5 +74,72 @@ describe("shadow DOM support", () => {
     const marker = document.querySelector<HTMLElement>(".tk-hint")!;
     expect(marker.style.display).not.toBe("none");
     expect(marker.style.left).toBe("140px"); // middle-end anchor: x + width
+  });
+
+  it("waitForTarget detects a target mounted later inside a scoped ShadowRoot", async () => {
+    const shadow = mountWidget();
+    const observe = vi.spyOn(MutationObserver.prototype, "observe");
+    const tour = mountTour({
+      root: shadow,
+      overlay: { transitionMs: 0 },
+      steps: [{ target: "#late-shadow", content: "Waiting inside shadow" }],
+    });
+
+    await tour.start();
+    // jsdom (unlike browsers) reports shadow-tree mutations to an observer on
+    // document.body, so the anchoring below would pass even if the scope were
+    // not watched. Assert the watch itself; tests/e2e/shadow.spec.ts covers
+    // the browser behaviour end to end.
+    expect(observe).toHaveBeenCalledWith(shadow, expect.objectContaining({ subtree: true }));
+    observe.mockRestore();
+    expect(document.querySelector(".tk-tooltip")!.classList.contains("tk-tooltip--center")).toBe(
+      true
+    );
+
+    const late = document.createElement("button");
+    late.id = "late-shadow";
+    withRect(late, fakeRect(80, 40, 50, 20));
+    shadow.append(late);
+
+    await vi.waitFor(() => expect(overlayPath()).toContain("M80 32"), { timeout: 2000 });
+    expect(document.querySelector(".tk-tooltip")!.classList.contains("tk-tooltip--center")).toBe(
+      false
+    );
+  });
+
+  it("Escape inside an editable input in a ShadowRoot does not exit the tour", async () => {
+    const shadow = mountWidget();
+    const input = document.createElement("input");
+    shadow.append(input);
+
+    const tour = mountTour({
+      root: shadow,
+      steps: [{ target: "#inside", content: "Step 1" }],
+    });
+    await tour.start();
+
+    input.focus();
+    expect(shadow.activeElement).toBe(input);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(tour.isActive).toBe(true);
+  });
+
+  it("restores focus to an element inside a ShadowRoot on exit", async () => {
+    const shadow = mountWidget();
+    const trigger = shadow.getElementById("inside") as HTMLButtonElement;
+    trigger.focus();
+    expect(shadow.activeElement).toBe(trigger);
+
+    const tour = mountTour({
+      root: shadow,
+      steps: [{ content: "Floating" }],
+    });
+    await tour.start();
+    expect(shadow.activeElement).not.toBe(trigger);
+
+    await tour.exit(true);
+    expect(shadow.activeElement).toBe(trigger);
   });
 });

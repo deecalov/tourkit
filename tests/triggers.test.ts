@@ -51,6 +51,40 @@ describe("bindTriggers", () => {
     expect(document.querySelector(".tk-tooltip__content")?.textContent).toBe("billing step");
   });
 
+  it("a group with no visible steps starts nothing (no fallback to the whole page)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    addStep("page-wide step"); // ungrouped markup elsewhere on the page
+    addStep("billing step", "billing");
+    (document.querySelector('[data-tour-group="billing"]') as HTMLElement).style.display = "none";
+    const trigger = addTrigger("billing");
+    unbind = bindTriggers();
+
+    trigger.click();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(document.querySelector(".tk-root")).toBeNull();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('data-tour-trigger="billing"'));
+    warn.mockRestore();
+  });
+
+  it("a click on an empty group leaves the running trigger tour alone", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    addStep("onboarding step", "onboarding");
+    const start = addTrigger("onboarding");
+    const empty = addTrigger("typo");
+    unbind = bindTriggers();
+
+    start.click();
+    await vi.waitFor(() => expect(document.querySelector(".tk-root")).not.toBeNull());
+    const running = document.querySelector(".tk-root");
+    empty.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    // Same root: the running tour was neither exited nor restarted.
+    expect(document.querySelector(".tk-root")).toBe(running);
+    vi.restoreAllMocks();
+  });
+
   it("works with delegation for triggers added after binding", async () => {
     addStep("late");
     unbind = bindTriggers();

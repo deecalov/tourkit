@@ -50,4 +50,22 @@ describe("theming documentation", () => {
     expect(doc).toContain("--tk-overlay-color");
     expect(doc).toMatch(/not a triplet|colour, not a triplet/i);
   });
+
+  it("keeps dark theme and auto dark-mode CSS variable definitions identical", () => {
+    const darkBlock = css.match(/\.tk-root\[data-tk-theme="dark"\]\s*\{([^}]*)\}/);
+    const autoBlock = css.match(
+      /@media\s*\(prefers-color-scheme:\s*dark\)\s*\{\s*\.tk-root\[data-tk-theme="auto"\]\s*\{([^}]*)\}/
+    );
+    expect(darkBlock).not.toBeNull();
+    expect(autoBlock).not.toBeNull();
+
+    const normalizeVars = (block: string) =>
+      block
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .split(";")
+        .map((line) => line.replace(/\s+/g, " ").trim())
+        .filter((line) => line.startsWith("--tk-"));
+
+    expect(normalizeVars(darkBlock![1]!)).toEqual(normalizeVars(autoBlock![1]!));
+  });
 });

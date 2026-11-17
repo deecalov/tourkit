@@ -1,14 +1,14 @@
 import { Emitter } from "../core/emitter";
 import { resolveTarget } from "../core/engine";
-import { DEFAULT_HINT_DISMISS, defaultScroll } from "../core/options";
+import { DEFAULT_HINT_DISMISS, definedOnly, defaultScroll } from "../core/options";
 import { resolveStorage, type StorageKind } from "../core/storage";
 import type { Labels, Placement, ScrollOptions, Side, TargetRef } from "../core/types";
 import { createAutoUpdater, type AutoUpdater } from "../geometry/autoUpdate";
 import { isPlacement, resolvePlacement } from "../geometry/placement";
 import { targetRect, viewportRect, type Rect } from "../geometry/rect";
 import { scrollTargetIntoView } from "../geometry/scrollIntoView";
-import { h, isElementHidden, nextId, setContent } from "../ui/dom";
-import { trapFocus } from "../ui/focus";
+import { h, isElementHidden, nextId, plainText, setContent } from "../ui/dom";
+import { activeElement, trapFocus } from "../ui/focus";
 import { acquireHostClass, HINTS_OPEN_CLASS } from "../ui/hostFlags";
 
 export type MarkerAnchor = `${"top" | "middle" | "bottom"}-${"start" | "center" | "end"}`;
@@ -243,14 +243,14 @@ export function createHints(options: HintsOptions = {}): Hints {
 
   const isRtl = () => root !== null && getComputedStyle(root).direction === "rtl";
 
-  const positionMarker = (index: number) => {
+  const positionMarker = (index: number, rtl = isRtl()) => {
     const marker = markers[index];
     const hint = hints[index];
     if (!marker || !hint) return;
 
     const el = resolveTarget(hint.target, options.root);
     if (!el || !el.isConnected) {
-      marker.style.display = "none";
+      if (marker.style.display !== "none") marker.style.display = "none";
       return;
     }
 
@@ -258,23 +258,24 @@ export function createHints(options: HintsOptions = {}): Hints {
     // A connected but hidden target (display: none) reports a zero rect at
     // the origin — hide the marker instead of pinning a dot to (0,0).
     if (rect.width === 0 && rect.height === 0) {
-      marker.style.display = "none";
+      if (marker.style.display !== "none") marker.style.display = "none";
       return;
     }
 
-    if (!hint.dismissed) marker.style.display = "";
-    const point = markerAnchorPoint(rect, hint.markerPosition, isRtl());
-    marker.style.left = `${Math.round(point.x)}px`;
-    marker.style.top = `${Math.round(point.y)}px`;
+    if (!hint.dismissed && marker.style.display !== "") marker.style.display = "";
+    const point = markerAnchorPoint(rect, hint.markerPosition, rtl);
+    const left = `${Math.round(point.x)}px`;
+    const top = `${Math.round(point.y)}px`;
+    if (marker.style.left !== left) marker.style.left = left;
+    if (marker.style.top !== top) marker.style.top = top;
   };
 
-  const positionPopover = () => {
+  const positionPopover = (rtl = isRtl()) => {
     if (!popover || openIndex === null) return;
     const marker = markers[openIndex];
     if (!marker) return;
 
     const anchor = targetRect(marker);
-    popover.style.visibility = "hidden";
     const size = { width: popover.offsetWidth, height: popover.offsetHeight };
     const resolved = resolvePlacement(
       hints[openIndex]!.placement,
@@ -282,21 +283,27 @@ export function createHints(options: HintsOptions = {}): Hints {
       size,
       viewportRect(),
       placementPrecedence,
-      { gap: 10, rtl: isRtl() }
+      { gap: 10, rtl }
     );
-    popover.style.left = `${Math.round(resolved.x)}px`;
-    popover.style.top = `${Math.round(resolved.y)}px`;
-    popover.style.visibility = "";
+    const left = `${Math.round(resolved.x)}px`;
+    const top = `${Math.round(resolved.y)}px`;
+    if (popover.style.left !== left) popover.style.left = left;
+    if (popover.style.top !== top) popover.style.top = top;
   };
 
   const syncAll = () => {
-    hints.forEach((_, i) => positionMarker(i));
-    positionPopover();
+    const rtl = isRtl();
+    hints.forEach((_, i) => positionMarker(i, rtl));
+    positionPopover(rtl);
   };
 
   const close = () => {
     if (openIndex === null) return;
     const marker = markers[openIndex];
+    // Hand focus back to the marker only when it was inside the popover (Esc,
+    // the dismiss button): an outside click has already moved focus where
+    // the user wanted it — into a field, say — and must not lose it.
+    const refocus = popover?.contains(activeElement()) ?? false;
     marker?.setAttribute("aria-expanded", "false");
     marker?.removeAttribute("aria-controls");
     openIndex = null;
@@ -306,9 +313,12 @@ export function createHints(options: HintsOptions = {}): Hints {
     popover = null;
     releaseHostClass?.();
     releaseHostClass = null;
-    // Return keyboard focus to the marker that opened the popover.
-    marker?.focus({ preventScroll: true });
+    if (refocus) marker?.focus({ preventScroll: true });
   };
+
+  /** Accessible name of a hint: its content as plain text, even with allowHTML. */
+  const labelOf = (hint: Hint) =>
+    plainText(hint.content, options.allowHTML ?? false, options.sanitize);
 
   const open = (index: number, openOptions?: HintOpenOptions) => {
     const hint = hints[index];
@@ -325,7 +335,7 @@ export function createHints(options: HintsOptions = {}): Hints {
     // which the auto-updater re-anchors to the target as the page moves.
     if (openOptions?.scroll ?? scrollOnOpen) {
       const el = resolveTarget(hint.target, options.root);
-      if (el) scrollTargetIntoView(el, { ...defaultScroll, ...options.scroll });
+      if (el) scrollTargetIntoView(el, { ...defaultScroll, ...definedOnly(options.scroll) });
       syncAll();
     }
 
@@ -341,7 +351,7 @@ export function createHints(options: HintsOptions = {}): Hints {
       "div",
       {
         className: "tk-hint-popover",
-        attrs: { role: "dialog", "aria-label": hint.content, id: popoverId, tabindex: -1 },
+        attrs: { role: "dialog", "aria-label": labelOf(hint), id: popoverId, tabindex: -1 },
       },
       [
         content,
@@ -410,7 +420,7 @@ export function createHints(options: HintsOptions = {}): Hints {
         className: `tk-hint${hint.dismissed ? " tk-hint--hidden" : ""}${pulse ? "" : " tk-hint--static"}`,
         attrs: {
           type: "button",
-          "aria-label": hint.content,
+          "aria-label": labelOf(hint),
           "aria-expanded": "false",
           "aria-haspopup": "dialog",
         },
@@ -466,7 +476,10 @@ export function createHints(options: HintsOptions = {}): Hints {
       const onKeyDown = (e: KeyboardEvent) => {
         // Esc consumed by the host (its own dialog above the popover) must not
         // close the popover as well.
-        if (e.key === "Escape" && !e.defaultPrevented) close();
+        if (e.key !== "Escape" || e.defaultPrevented || openIndex === null) return;
+        // Consumed here: a tour or spotlight under the popover keeps running.
+        e.preventDefault();
+        close();
       };
       document.addEventListener("click", onDocClick);
       document.addEventListener("keydown", onKeyDown);

@@ -74,6 +74,11 @@ createTour({
   waitForTarget: { timeoutMs: 8000, onTimeout: "skip" }, // per-tour default; per-step override or `false`
   steps: [
     { target: "#mounted-later", content: "Appears when ready", advanceOn: { event: "click" } },
+    {
+      target: "#settings-menu .export",
+      content: "Export lives in the settings menu.",
+      onBeforeShow: () => openSettingsMenu(), // prepare the DOM; return false to cancel
+    },
   ],
 });
 
@@ -84,6 +89,11 @@ spot.destroy(); // or Esc / backdrop click
 
 tour.complete(); // programmatic completion: reason "finished", showOnce marked
 ```
+
+Step hooks: `onBeforeShow(ctx)` runs before a step is shown — return `false`
+to cancel the navigation, or prepare the DOM (open a menu, switch a tab). The
+target is resolved again after the hook, so an element it mounted is scrolled
+to and spotlighted. `onShown(ctx)` runs once the step is on screen.
 
 Modal onboarding: `createTour({ modal: true, ... })` sets `aria-modal` and
 makes everything outside the tour `inert` (restored on exit) — the one
@@ -256,14 +266,14 @@ is the deliberate trade for stable, individually copyable filenames.
 
 `createTour(options)` returns a `Tour`:
 
-| Member                                                       | Description                                                                                                           |
-| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `start(opts?)` / `exit(force?)` / `complete()` / `destroy()` | lifecycle; `start({ replace: true })` ends other running tours first, `complete()` finishes with `reason: "finished"` |
-| `next()` / `back()` / `goTo(i)`                              | navigation (0-based)                                                                                                  |
-| `refresh(rescanSteps?)`                                      | re-sync geometry / re-read steps                                                                                      |
-| `index`, `steps`, `isActive`                                 | state                                                                                                                 |
-| `setOptions(patch)`                                          | update options; an active tour re-renders the current step live                                                       |
-| `on(event, cb)` / `once(event, cb)`                          | `start`, `beforeStepChange`, `stepChange`, `beforeExit`, `exit`, `complete` — cancellable via `e.cancel()`            |
+| Member                                                       | Description                                                                                                                                                                                                    |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `start(opts?)` / `exit(force?)` / `complete()` / `destroy()` | lifecycle; `start({ replace: true })` ends other running tours first, `complete()` finishes with `reason: "finished"`, `destroy()` is instant, cancels a pending `start()` and leaves the instance restartable |
+| `next()` / `back()` / `goTo(i)`                              | navigation (0-based)                                                                                                                                                                                           |
+| `refresh(rescanSteps?)`                                      | re-sync geometry / re-read steps                                                                                                                                                                               |
+| `index`, `steps`, `isActive`                                 | state                                                                                                                                                                                                          |
+| `setOptions(patch)`                                          | update options; an active tour re-renders the current step live                                                                                                                                                |
+| `on(event, cb)` / `once(event, cb)`                          | `start`, `beforeStepChange`, `stepChange`, `beforeExit`, `exit`, `complete` — cancellable via `e.cancel()`                                                                                                     |
 
 Event order on finishing or skipping: `beforeExit` (cancellable guard) →
 `complete` → `exit`. A cancelled `beforeExit` keeps the tour active and no
@@ -273,9 +283,16 @@ Buttons: `buttons.doneOnLast` turns Next into Done on the last step;
 `buttons.hideBackOnFirst` / `buttons.hideNextOnLast` hide the boundary
 buttons instead of rendering them disabled.
 
+Options: `undefined` — an unset prop forwarded by a wrapper — keeps an option's
+default; optional ones such as `theme` or `zIndex` are cleared with
+`setOptions({ theme: undefined })`.
+
 Keyboard: `Esc` exit (ignored when the host already handled that `Esc`),
 `←`/`→` navigate, `Home`/`End` jump, `Tab` cycles inside the dialog (plus the
-highlighted target when interaction is allowed).
+highlighted target when interaction is allowed). Inside interactive step
+content (`renderStep` forms, selects, ARIA sliders) the arrows, `Home` and
+`End` stay with the control, and an `Esc` that closes an open hint popover
+leaves the tour running.
 
 Multi-page tours: `getPersistedProgress(key, storage?)` reports the saved step
 index without touching the storage format, so a host can offer "continue where

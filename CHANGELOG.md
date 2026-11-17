@@ -1,5 +1,88 @@
 # Changelog
 
+## 0.7.2 — 2026-11-17
+
+Fixes from a post-0.7 audit of the library. Every defect below was first
+reproduced by a failing test.
+
+### Fixed
+
+- **`destroy()` racing a pending transition.** `start()` followed by an
+  immediate `destroy()` — React StrictMode's effect → cleanup → effect, or a
+  fast route change — used to mount the tour anyway, leaving an overlay nobody
+  owned. A transition queued before `destroy()` is now dropped, and one in
+  flight stops at its next await. Likewise, `destroy()` during the exit fade
+  followed by a new `start()` no longer lets the old fade-out remove the new
+  tour's DOM.
+- **A destroyed tour can be started again.** `destroy()` also removed the
+  tour's own listeners, so a restarted instance stopped marking `showOnce`,
+  saving `persistProgress` and leaving the active-tour registry (every later
+  tour then warned "another tour is already running"). Listeners registered
+  with `on()`/`once()` are still removed by `destroy()`.
+- **A target prepared by `onBeforeShow` is used.** The target is resolved again
+  after the hook, so an element the hook mounted or revealed (a menu, a tab) is
+  scrolled to and reported to `onShown`/`stepChange` instead of `null`. The hook
+  itself still receives the context as it was before it ran.
+- **Explicit `undefined` options no longer erase defaults.** Wrappers that
+  forward unset props (`{ placement: props.placement }`) crashed the tour
+  (`placement: undefined`) or hid buttons (`buttons: { next: undefined }`).
+  `undefined` now means "not provided" for every option that has a default,
+  including nested `labels`/`buttons`/`overlay`/`scroll`/`waitForTarget` keys
+  and `highlight()`'s `overlay`/`scroll`; optional options (`theme`, `zIndex`,
+  `showOnce`, ...) can still be cleared with it through `setOptions`.
+- **`bindTriggers`: a group without visible steps starts nothing.** It used to
+  fall back to a scan of the whole page without the group filter and tour
+  unrelated markup. Now it logs a warning and leaves a running tour alone.
+- **Arrow keys, Home and End inside interactive step content** (`renderStep`
+  forms, selects, ARIA sliders, listboxes, tablists, ...) move the caret or
+  the selection instead of switching steps.
+- **Hint popovers:** closing by a click outside no longer pulls focus back to
+  the marker (it stole focus from the field the user clicked into); Esc returns
+  focus to the marker as before. The Esc that closes a popover no longer also
+  ends a tour or a `highlight()` underneath, regardless of which registered
+  first. With `allowHTML` the marker and popover get a plain-text accessible
+  name instead of raw markup (parsed in an inert document).
+- **Scrolling to targets:** a target scrolled out of a nested scroller
+  (sidebar, list) is brought into view even when its rect lies inside the
+  viewport; `overflow: hidden` widgets are still left alone. A larger
+  `scroll-margin` the page declares (for a sticky header) is honoured in both
+  the visibility check and the scroll, and an inline `scroll-margin-top` on
+  the target survives the scroll.
+- **`lockScroll` with `scrollbar-gutter: stable`** no longer shifts the layout
+  by the scrollbar width: the reserved gutter is not compensated twice.
+- **Shadow DOM parity for `waitForTarget`, keyboard guard and focus restore.**
+  `MutationObserver` in `_startTargetWatch` now observes `options.root` when it
+  is outside `document.body` (such as an open `ShadowRoot`), so asynchronously
+  mounted shadow targets are detected immediately instead of timing out.
+  Keyboard handling (`_bindKeyboard`) and `rememberFocus` now resolve the active
+  element through open shadow roots (`activeElement()`), preventing `Escape` or
+  arrow keys inside a shadow `<input>` from controlling/closing the tour and
+  restoring focus to shadow triggers on exit.
+- **No forced synchronous layout on hint scroll sync.** `Hints.positionPopover`
+  no longer toggles `popover.style.visibility = "hidden"` before reading
+  `offsetWidth`/`offsetHeight`, caches the RTL check once per `syncAll()`, and
+  skips redundant `style.left`/`style.top`/`style.display` writes when rounded
+  coordinates have not changed.
+
+### Changed
+
+- **Headless API:** `TourEngine.forceIdle()` now drops transitions that were
+  queued before it, and the one in flight no longer touches the state after
+  it. `skip()`, `complete()` and `exit()` resolve to `false` when interrupted
+  that way.
+- Bundle budgets raised for the fixes: core 11 → 11.5 KB brotli (actual
+  11.28), `index.global.js` 11.5 → 12 KB (11.49).
+
+### Tooling
+
+- `npm run test:coverage` upper-cases the drive letter on Windows; a working
+  directory spelled `e:\` made Vitest count every file twice and fail the
+  thresholds at ~37 %.
+- New browser specs: `tests/e2e/shadow.spec.ts` (jsdom reports shadow-tree
+  mutations to an observer on `document.body`, browsers do not, so only a
+  browser can verify the ShadowRoot watch) and `tests/e2e/scroll.spec.ts`
+  (nested scrollers, sticky headers, `scrollbar-gutter`).
+
 ## 0.7.1 — 2026-11-16
 
 The npm package is now distributed as **sitetourkit**. Install it with

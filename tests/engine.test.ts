@@ -78,6 +78,39 @@ describe("TourEngine", () => {
   });
 
   describe("navigation", () => {
+    it("resolves the target again after onBeforeShow prepared the DOM", async () => {
+      const shown = vi.fn();
+      const changed = vi.fn();
+      let seenByHook: Element | null | undefined;
+      engine.events.on("stepChange", changed);
+
+      await engine.start([
+        makeStep(),
+        makeStep({
+          target: "#hook-prepared",
+          onBeforeShow: (ctx) => {
+            seenByHook = ctx.target; // the hook runs before the target exists
+            const el = document.createElement("div");
+            el.id = "hook-prepared";
+            document.body.append(el);
+          },
+          onShown: shown,
+        }),
+      ]);
+      await engine.next();
+
+      const prepared = document.getElementById("hook-prepared");
+      expect(prepared).not.toBeNull();
+      expect(seenByHook).toBeNull();
+      expect(delegate.showStep).toHaveBeenLastCalledWith(
+        expect.objectContaining({ target: prepared }),
+        "forward"
+      );
+      expect(shown).toHaveBeenCalledWith(expect.objectContaining({ target: prepared }));
+      expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ target: prepared }));
+      prepared!.remove();
+    });
+
     const steps = [makeStep(), makeStep(), makeStep()];
 
     it("next/back move between steps with correct directions", async () => {
@@ -299,6 +332,60 @@ describe("TourEngine", () => {
 
       expect(engine.isActive).toBe(false);
       expect(engine.index).toBeUndefined();
+    });
+
+    it("forceIdle drops a start that is still queued", async () => {
+      const started = engine.start([makeStep()]);
+      engine.forceIdle();
+
+      expect(await started).toBe(false);
+      expect(delegate.mount).not.toHaveBeenCalled();
+      expect(engine.isActive).toBe(false);
+    });
+
+    it("forceIdle stops a start that awaits an async listener before mounting", async () => {
+      let release: (() => void) | undefined;
+      engine.events.on(
+        "start",
+        () =>
+          new Promise<void>((resolve) => {
+            release = resolve;
+          })
+      );
+
+      const started = engine.start([makeStep()]);
+      await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+      engine.forceIdle();
+      release!();
+
+      expect(await started).toBe(false);
+      expect(delegate.mount).not.toHaveBeenCalled();
+      expect(engine.isActive).toBe(false);
+    });
+
+    it("a teardown interrupted by forceIdle does not reset the run started after it", async () => {
+      let finishUnmount: (() => void) | undefined;
+      delegate.unmount.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishUnmount = resolve;
+          })
+      );
+      const exited = vi.fn();
+      engine.events.on("exit", exited);
+
+      await engine.start([makeStep()]);
+      const exiting = engine.exit(true);
+      await vi.waitFor(() => expect(finishUnmount).toBeTypeOf("function"));
+
+      engine.forceIdle();
+      expect(await engine.start([makeStep(), makeStep()])).toBe(true);
+
+      finishUnmount!();
+      expect(await exiting).toBe(false);
+      expect(engine.isActive).toBe(true);
+      expect(engine.index).toBe(0);
+      expect(exited).not.toHaveBeenCalled();
     });
   });
 });

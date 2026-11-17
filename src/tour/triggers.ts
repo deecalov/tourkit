@@ -51,6 +51,14 @@ export function bindTriggers(root?: ParentNode, options: TourOptionsInput = {}):
       ? options.steps
       : fromDataAttributes(scope, { group, attribute });
 
+    // Nothing visible in this group (a typo, or a tab that is still hidden).
+    // Handing createTour() an empty list would make it rescan the whole
+    // document without the group filter and tour unrelated markup.
+    if (steps.length === 0) {
+      console.warn(`[tourkit] ${triggerAttr}${group ? `="${group}"` : ""}: no visible steps.`);
+      return;
+    }
+
     const previous = activeTriggerTour;
     const tour = createTour({ ...options, steps });
     activeTriggerTour = tour;

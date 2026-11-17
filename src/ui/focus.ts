@@ -3,9 +3,9 @@ const FOCUSABLE =
 
 /** Captures the currently focused element; returns a function that restores focus to it. */
 export function rememberFocus(): () => void {
-  const previous = document.activeElement;
+  const previous = activeElement();
   return () => {
-    if (previous instanceof HTMLElement && previous.isConnected) {
+    if (previous && previous.isConnected) {
       previous.focus({ preventScroll: true });
     }
   };
@@ -48,7 +48,7 @@ function collectFocusables(root: Element | ShadowRoot): HTMLElement[] {
 }
 
 /** Deepest focused element: `activeElement` stops at each shadow host. */
-function activeElement(): HTMLElement | null {
+export function activeElement(): HTMLElement | null {
   let node: Element | null = document.activeElement;
   while (node?.shadowRoot?.activeElement) {
     node = node.shadowRoot.activeElement;

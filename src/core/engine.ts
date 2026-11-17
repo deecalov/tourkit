@@ -50,6 +50,14 @@ export class TourEngine {
   private _steps: Step[] = [];
   private _index: number | undefined;
   private _queue: Promise<unknown> = Promise.resolve();
+  /**
+   * Bumped by `forceIdle()`. A transition remembers the generation it was
+   * queued in and stops at its next await once that has changed: a destroy()
+   * racing a pending start() (React StrictMode, a fast route change) must not
+   * mount a tour nobody owns any more, and a teardown it interrupted must not
+   * reset a run started afterwards.
+   */
+  private _generation = 0;
 
   /**
    * `getScope` supplies the lookup root for string targets; it is a callback
@@ -83,29 +91,37 @@ export class TourEngine {
   /**
    * Serializes all public transitions: a rapid double-click on "Next"
    * runs the second transition only after the first one fully settles.
+   * A transition queued before `forceIdle()` resolves to `dropped` untouched;
+   * one already running gets `live()` to check after each of its awaits.
    */
-  private _enqueue<T>(task: () => Promise<T>): Promise<T> {
-    const run = this._queue.then(task, task);
+  private _enqueue<T>(dropped: T, task: (live: () => boolean) => Promise<T>): Promise<T> {
+    const generation = this._generation;
+    const live = () => generation === this._generation;
+    const guarded = () => (live() ? task(live) : dropped);
+    const run = this._queue.then(guarded, guarded);
     this._queue = run.catch(() => undefined);
     return run;
   }
 
   /** Starts the tour, optionally from a specific step (multi-page resume). */
   start(steps: Step[], startAt = 0): Promise<boolean> {
-    return this._enqueue(async () => {
+    return this._enqueue(false, async (live) => {
       if (this._state !== "idle" || steps.length === 0) return false;
 
       this._steps = steps;
       await this.events.emit("start", { steps: this._steps });
+      if (!live()) return false;
 
       await this._delegate.mount();
+      if (!live()) return false;
       this._state = "active";
 
       const initial = Math.min(Math.max(startAt, 0), steps.length - 1);
-      const shown = await this._goTo(initial);
+      const shown = await this._goTo(initial, live);
+      if (!live()) return false;
       if (!shown) {
         // The very first step was cancelled by a guard: tear down quietly.
-        await this._exit(true);
+        await this._exit(true, live);
         return false;
       }
       return true;
@@ -113,40 +129,39 @@ export class TourEngine {
   }
 
   next(): Promise<void> {
-    return this._enqueue(async () => {
+    return this._enqueue(undefined, async (live) => {
       if (this._state !== "active" || this._index === undefined) return;
 
       if (this._index >= this._steps.length - 1) {
-        await this._complete("finished");
+        await this._complete("finished", live);
         return;
       }
-      await this._goTo(this._index + 1);
+      await this._goTo(this._index + 1, live);
     });
   }
 
   back(): Promise<void> {
-    return this._enqueue(async () => {
+    return this._enqueue(undefined, async (live) => {
       if (this._state !== "active" || this._index === undefined) return;
       if (this._index <= 0) return;
-      await this._goTo(this._index - 1);
+      await this._goTo(this._index - 1, live);
     });
   }
 
   goTo(index: number): Promise<void> {
-    return this._enqueue(async () => {
+    return this._enqueue(undefined, async (live) => {
       if (this._state !== "active") return;
       if (index < 0 || index >= this._steps.length || index === this._index) return;
-      await this._goTo(index);
+      await this._goTo(index, live);
     });
   }
 
   /** Exit initiated by the skip/close button: reports the tour as completed-by-skipping. */
   skip(): Promise<boolean> {
-    return this._enqueue(async () => {
+    return this._enqueue(false, async (live) => {
       if (this._state !== "active") return false;
-      await this._complete("skipped");
-      // _complete may have been blocked by a beforeExit guard.
-      return (this._state as EngineState) === "idle";
+      // False when a beforeExit guard blocked it.
+      return this._complete("skipped", live);
     });
   }
 
@@ -156,20 +171,19 @@ export class TourEngine {
    * Guarded by `beforeExit` like every other completion path.
    */
   complete(): Promise<boolean> {
-    return this._enqueue(async () => {
+    return this._enqueue(false, async (live) => {
       if (this._state !== "active") return false;
-      await this._complete("finished");
-      return (this._state as EngineState) === "idle";
+      return this._complete("finished", live);
     });
   }
 
   exit(force = false): Promise<boolean> {
-    return this._enqueue(() => this._exit(force));
+    return this._enqueue(false, (live) => this._exit(force, live));
   }
 
   /** Re-shows the current step without firing navigation guards (used by refresh). */
   reshow(): Promise<void> {
-    return this._enqueue(async () => {
+    return this._enqueue(undefined, async () => {
       if (this._state !== "active" || this._index === undefined) return;
 
       const index = Math.min(this._index, this._steps.length - 1);
@@ -182,22 +196,29 @@ export class TourEngine {
     });
   }
 
-  /** Immediate reset used by destroy(); the delegate is torn down by the caller. */
+  /**
+   * Immediate reset used by destroy(); the delegate is torn down by the caller.
+   * Transitions still queued are dropped, and the one in flight stops at its
+   * next await without touching the state again.
+   */
   forceIdle(): void {
+    this._generation += 1;
     this._state = "idle";
     this._index = undefined;
     this._queue = Promise.resolve();
   }
 
-  private async _complete(reason: CompleteReason): Promise<void> {
+  /** True when the tour actually ended (not blocked by a guard or a forceIdle). */
+  private async _complete(reason: CompleteReason, live: () => boolean): Promise<boolean> {
     // Ask the beforeExit guard for permission BEFORE announcing completion:
     // a cancelled exit must not report `complete` (analytics, showOnce).
-    if (!(await this._requestExit())) return;
+    if (!(await this._requestExit(live))) return false;
     await this.events.emit("complete", { reason });
-    await this._teardown();
+    if (!live()) return false;
+    return this._teardown(live);
   }
 
-  private async _goTo(to: number): Promise<boolean> {
+  private async _goTo(to: number, live: () => boolean): Promise<boolean> {
     const step = this._steps[to];
     if (!step) return false;
 
@@ -214,9 +235,9 @@ export class TourEngine {
         cancelled = true;
       },
     });
-    if (cancelled) return false;
+    if (cancelled || !live()) return false;
 
-    const ctx: StepContext = {
+    let ctx: StepContext = {
       index: to,
       step,
       target: resolveTarget(step.target, this._getScope()),
@@ -224,44 +245,54 @@ export class TourEngine {
 
     if (step.onBeforeShow) {
       const hook = step.onBeforeShow;
+      const before = ctx;
       // A throwing guard must not block the tour: show the step.
-      const result = await runStepHook("onBeforeShow", () => hook(ctx), undefined);
-      if (result === false) return false;
+      const result = await runStepHook("onBeforeShow", () => hook(before), undefined);
+      if (result === false || !live()) return false;
+      // The hook typically prepares the DOM (opens a menu, switches a tab,
+      // mounts a view): resolve again, or the step would neither scroll to the
+      // new target nor report it to onShown / stepChange.
+      ctx = { ...before, target: resolveTarget(step.target, this._getScope()) };
     }
 
     this._index = to;
     await this._delegate.showStep(ctx, direction);
+    if (!live()) return false;
     if (step.onShown) {
       const hook = step.onShown;
       await runStepHook("onShown", () => hook(ctx), undefined);
+      if (!live()) return false;
     }
     await this.events.emit("stepChange", ctx);
-    return true;
+    return live();
   }
 
-  private async _exit(force: boolean): Promise<boolean> {
+  private async _exit(force: boolean, live: () => boolean): Promise<boolean> {
     if (this._state === "idle") return false;
-    if (!force && !(await this._requestExit())) return false;
-
-    await this._teardown();
-    return true;
+    if (!force && !(await this._requestExit(live))) return false;
+    return this._teardown(live);
   }
 
   /** Emits the cancellable `beforeExit` guard; `false` means "stay active". */
-  private async _requestExit(): Promise<boolean> {
+  private async _requestExit(live: () => boolean): Promise<boolean> {
     let cancelled = false;
     await this.events.emit("beforeExit", {
       cancel: () => {
         cancelled = true;
       },
     });
-    return !cancelled;
+    return !cancelled && live();
   }
 
-  private async _teardown(): Promise<void> {
+  /** False when a forceIdle() interrupted the unmount (destroy() mid fade-out). */
+  private async _teardown(live: () => boolean): Promise<boolean> {
     await this._delegate.unmount();
+    // destroy() already reset everything, and a run started since then must
+    // neither be reset nor hear an `exit` that is not its own.
+    if (!live()) return false;
     this._index = undefined;
     this._state = "idle";
     await this.events.emit("exit", {});
+    return true;
   }
 }

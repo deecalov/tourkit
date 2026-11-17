@@ -179,6 +179,52 @@ describe("createHints", () => {
     hints.destroy();
   });
 
+  it("a click outside closes the popover without pulling focus back to the marker", () => {
+    const hints = make();
+    hints.render();
+    hints.open(0);
+    const input = document.createElement("input");
+    document.body.append(input);
+
+    input.focus(); // mousedown focuses what the user clicked …
+    input.click(); // … then the outside click closes the popover
+    expect(document.querySelector(".tk-hint-popover")).toBeNull();
+    expect(document.activeElement).toBe(input);
+
+    hints.destroy();
+  });
+
+  it("Escape inside the popover returns focus to its marker", () => {
+    const hints = make();
+    hints.render();
+    hints.open(0);
+    const marker = document.querySelector<HTMLButtonElement>(".tk-hint")!;
+    expect(document.activeElement?.closest(".tk-hint-popover")).not.toBeNull();
+
+    document.activeElement!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    expect(document.activeElement).toBe(marker);
+
+    hints.destroy();
+  });
+
+  it("with allowHTML the marker and the popover get a plain-text accessible name", () => {
+    const hints = createHints({
+      allowHTML: true,
+      hints: [{ target: "#hint-target", content: "<b>New</b>   <i>feature</i>" }],
+    });
+    hints.render();
+    expect(document.querySelector(".tk-hint")!.getAttribute("aria-label")).toBe("New feature");
+
+    hints.open(0);
+    const popover = document.querySelector(".tk-hint-popover")!;
+    expect(popover.getAttribute("aria-label")).toBe("New feature");
+    expect(popover.querySelector("b")?.textContent).toBe("New"); // content still rendered as HTML
+
+    hints.destroy();
+  });
+
   it("hides the marker while its target reports a zero rect (hidden) and restores it", () => {
     const visible = { x: 10, y: 20, width: 30, height: 40 };
     let current = visible;
@@ -307,6 +353,20 @@ describe("createHints", () => {
     const hints = make();
     // @ts-expect-error -- typo'd event names must not typecheck
     hints.on("opne", () => {});
+    hints.destroy();
+  });
+
+  it("refresh() skips redundant style writes and does not toggle popover visibility", () => {
+    const hints = make();
+    hints.render();
+    hints.open(0);
+
+    const popover = document.querySelector<HTMLElement>(".tk-hint-popover")!;
+    const visibilitySpy = vi.spyOn(popover.style, "visibility", "set");
+
+    hints.refresh();
+    expect(visibilitySpy).not.toHaveBeenCalled();
+
     hints.destroy();
   });
 });

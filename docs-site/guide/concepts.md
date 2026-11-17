@@ -44,6 +44,19 @@ The tooltip anchors to the **spotlight cutout** (target rect +
 `overlay.padding`), not to the raw element, so the arrow always points at the
 visible frame.
 
+## Scrolling to the target
+
+Before a step is shown, its target is scrolled into view with the native
+`scrollIntoView` (`scroll.block`, `scroll.behavior`), unless it is already
+comfortably visible: inside the viewport by `scroll.padding` vertically, and
+not scrolled out of a nested scroller such as a sidebar or a list. Widgets
+with `overflow: hidden` (carousels, truncated text) are left alone.
+
+`scroll.padding` is applied through a temporary inline `scroll-margin`. A
+larger `scroll-margin` your page declares — typically `scroll-margin-top`
+under a sticky header — wins per side, both in the "already visible" check and
+in the scroll, and an inline value on the target is restored afterwards.
+
 ## Lifecycle and events
 
 The engine is a state machine with a transition queue — a rapid double-click
@@ -60,6 +73,13 @@ on “Next” cannot race. All handlers may be async and are awaited.
 
 Completion paths: the Done button / `next()` past the last step / programmatic
 [`tour.complete()`](/api/) → `"finished"`; the × button → `"skipped"`.
+
+`tour.destroy()` is the synchronous, event-free teardown for frameworks. It
+also cancels a `start()` that has not settled yet — `start(); destroy();`
+mounts nothing — so React StrictMode's effect → cleanup → effect or a fast
+route change cannot leave an orphaned overlay behind. Listeners registered
+with `on()` / `once()` are removed; the tour's own bookkeeping (`showOnce`,
+`persistProgress`) keeps working, and the same instance can be started again.
 
 ## Content safety
 
@@ -112,7 +132,9 @@ interactive in this mode — `advanceOn` will warn and stay off.
 `lockScroll: true` freezes page scrolling for the duration of the tour (or of
 a single step, via `step.lockScroll`). The scrollbar width is compensated with
 padding so the layout does not jump, and the tour's own `scrollIntoView` keeps
-working — only the user's scrolling is blocked.
+working — only the user's scrolling is blocked. A page that reserves the
+gutter itself (`scrollbar-gutter: stable`) keeps it under `overflow: hidden`
+and gets no extra padding.
 
 Both are deliberate opt-in exceptions to the “never mutate the host DOM” rule;
 both restore the previous state exactly on exit.
@@ -121,4 +143,11 @@ both restore the previous state exactly on exit.
 `inert` is applied to the tour root's siblings once, when the tour mounts.
 Toasts or portals appended to `<body>` later stay interactive. Mount such
 layers before starting a modal tour, or render them inside the tour container.
+:::
+
+::: warning Modal mode with a custom `container`
+Only the siblings of the tour root become `inert`. With
+`container: someElement`, everything outside that element — a header or a
+sidebar next to it — stays interactive. Keep the default container
+(`document.body`) for modal tours.
 :::

@@ -75,3 +75,16 @@ would then be positioned outside the viewport. Ask for it per call
 
 While a popover is open, `<body>` carries `tk-hints-open` — see
 [Embedding](/guide/embedding#talking-to-the-host-page).
+
+## Focus and keyboard
+
+- Opening a popover moves focus to its button (or to the popover) and traps
+  `Tab` inside it.
+- `Esc` and the dismiss button close it and return focus to the marker. A
+  click elsewhere closes it too but leaves focus where the user clicked — in a
+  form field, say.
+- An open popover is the topmost layer: the `Esc` that closes it does not also
+  end a tour or a standalone `highlight()` underneath, whichever of them was
+  set up first.
+- Markers and popovers are labelled with the hint text. With `allowHTML` the
+  markup is stripped for that label (the popover itself still renders HTML).

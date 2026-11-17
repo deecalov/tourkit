@@ -91,16 +91,43 @@ export function resolveWaitForTarget(
   return { ...(base === false ? defaultWaitForTarget : base), ...override };
 }
 
-/** Merge a partial user patch into full options (one level deep for known nested objects). */
+/**
+ * Copy of `patch` without the keys whose value is `undefined`. Wrappers
+ * forward unset props verbatim (`{ padding: props.padding }`), and spreading
+ * those over the defaults would erase them.
+ */
+export function definedOnly<T extends object>(patch: T | undefined): Partial<T> {
+  const out: Partial<T> = {};
+  for (const key in patch) {
+    if (patch[key] !== undefined) out[key] = patch[key];
+  }
+  return out;
+}
+
+/**
+ * Merge a partial user patch into full options (one level deep for known
+ * nested objects). `undefined` means "not provided" for every option that has
+ * a default — `placement: undefined` must not leave the tour without one —
+ * while optional options (theme, zIndex, showOnce, ...) can still be cleared
+ * with it, which is how `setOptions` removes them.
+ */
 export function mergeOptions(base: TourOptions, patch: TourOptionsInput): TourOptions {
+  const defaulted = getDefaultOptions();
+  const top: Record<string, unknown> = { ...patch };
+  for (const key in top) {
+    if (top[key] === undefined && key in defaulted) delete top[key];
+  }
   return {
     ...base,
-    ...patch,
-    labels: { ...base.labels, ...patch.labels },
-    buttons: { ...base.buttons, ...patch.buttons },
-    overlay: { ...base.overlay, ...patch.overlay },
-    scroll: { ...base.scroll, ...patch.scroll },
-    waitForTarget: resolveWaitForTarget(base.waitForTarget, patch.waitForTarget),
+    ...(top as TourOptionsInput),
+    labels: { ...base.labels, ...definedOnly(patch.labels) },
+    buttons: { ...base.buttons, ...definedOnly(patch.buttons) },
+    overlay: { ...base.overlay, ...definedOnly(patch.overlay) },
+    scroll: { ...base.scroll, ...definedOnly(patch.scroll) },
+    waitForTarget: resolveWaitForTarget(
+      base.waitForTarget,
+      patch.waitForTarget ? definedOnly(patch.waitForTarget) : patch.waitForTarget
+    ),
   };
 }
 

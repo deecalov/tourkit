@@ -46,6 +46,13 @@ describe("highlight()", () => {
     expect(h.isActive).toBe(true);
   });
 
+  it("an explicit undefined overlay option falls back to the default", () => {
+    h = highlight("#spot", { overlay: { padding: undefined, radius: undefined } });
+
+    expect(overlayPath()).not.toContain("NaN");
+    expect(overlayPath()).toContain("M100 42"); // default padding 8, radius 8
+  });
+
   it("move() re-targets the spotlight", () => {
     const other = document.createElement("div");
     other.id = "other";

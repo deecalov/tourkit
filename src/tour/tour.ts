@@ -32,7 +32,12 @@ export interface Tour {
    * Resolves to `false` when inactive or cancelled by the guard.
    */
   complete(): Promise<boolean>;
-  /** Instant teardown: removes DOM and all listeners, no events, no animations. */
+  /**
+   * Instant teardown: removes DOM and every listener registered with `on` /
+   * `once`, cancels a `start()` that has not settled yet, no events, no
+   * animations. The instance may be started again afterwards (React
+   * StrictMode runs effect → cleanup → effect on the same instance).
+   */
   destroy(): void;
 
   next(): Promise<void>;
@@ -139,25 +144,34 @@ export function createTour(input: TourOptionsInput = {}): Tour {
 
   const engine: TourEngine = new TourEngine(renderer, () => options.root);
 
-  // Completing the tour (Done or skip button) marks it as seen.
-  engine.events.on("complete", () => markSeen());
-
-  // Multi-page progress: remember the step on every change; a completed or
-  // explicitly exited tour clears the key (navigating away keeps it, so the
-  // next page resumes where the user left off).
   const progressStorage = () => resolveStorage(options.persistProgress?.storage);
   const clearProgress = () => {
     if (options.persistProgress) progressStorage().remove(options.persistProgress.key);
   };
-  engine.events.on("stepChange", ({ index }) => {
-    if (options.persistProgress) {
-      progressStorage().set(options.persistProgress.key, String(index));
-    }
-  });
-  engine.events.on("exit", () => {
-    clearProgress();
-    activeTours.delete(tour);
-  });
+
+  /**
+   * The tour's own subscribers. destroy() clears every listener, these
+   * included, so it wires them again: a restarted instance must keep marking
+   * showOnce, saving progress and leaving the active-tour registry.
+   */
+  const wireInternalListeners = () => {
+    // Completing the tour (Done or skip button) marks it as seen.
+    engine.events.on("complete", () => markSeen());
+
+    // Multi-page progress: remember the step on every change; a completed or
+    // explicitly exited tour clears the key (navigating away keeps it, so the
+    // next page resumes where the user left off).
+    engine.events.on("stepChange", ({ index }) => {
+      if (options.persistProgress) {
+        progressStorage().set(options.persistProgress.key, String(index));
+      }
+    });
+    engine.events.on("exit", () => {
+      clearProgress();
+      activeTours.delete(tour);
+    });
+  };
+  wireInternalListeners();
 
   /** Fresh `options.steps` win; an empty list means "scan [data-tour]". */
   const resolveStepInputs = () =>
@@ -231,6 +245,7 @@ export function createTour(input: TourOptionsInput = {}): Tour {
       renderer.destroyNow();
       engine.forceIdle();
       engine.events.removeAll();
+      wireInternalListeners();
       activeTours.delete(tour);
     },
 

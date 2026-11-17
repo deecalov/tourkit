@@ -348,6 +348,44 @@ describe("createTour (DOM integration)", () => {
     });
   });
 
+  describe("explicit undefined options (wrappers forwarding unset props)", () => {
+    it("placement: undefined still renders an anchored step", async () => {
+      target.getBoundingClientRect = () =>
+        ({
+          x: 100,
+          y: 100,
+          width: 50,
+          height: 20,
+          top: 100,
+          left: 100,
+          right: 150,
+          bottom: 120,
+        }) as DOMRect;
+      const tour = createTour({
+        placement: undefined,
+        steps: [{ target: "#demo-target", content: "anchored" }],
+      });
+
+      expect(await tour.start()).toBe(true);
+      expect(document.querySelector(".tk-tooltip__content")?.textContent).toBe("anchored");
+      expect(document.querySelector(".tk-tooltip")!.classList.contains("tk-tooltip--bottom")).toBe(
+        true
+      );
+      tour.destroy();
+    });
+
+    it("buttons: { next: undefined } keeps the default Next button", async () => {
+      const tour = createTour({
+        buttons: { next: undefined },
+        steps: [{ content: "a" }, { content: "b" }],
+      });
+      await tour.start();
+
+      expect(document.querySelector(".tk-button--primary")?.textContent).toBe("Next");
+      tour.destroy();
+    });
+  });
+
   describe("dynamic DOM", () => {
     const fakeRect = (x: number, y: number, width: number, height: number) =>
       ({
@@ -361,6 +399,37 @@ describe("createTour (DOM integration)", () => {
         bottom: y + height,
         toJSON: () => ({}),
       }) as DOMRect;
+
+    it("scrolls to a target that onBeforeShow mounted", async () => {
+      const scrolled = vi.fn();
+      const tour = createTour({
+        overlay: { transitionMs: 0 },
+        scroll: { behavior: "auto" },
+        steps: [
+          { content: "intro" },
+          {
+            target: "#prepared",
+            content: "prepared by the hook",
+            onBeforeShow: () => {
+              // Typical use: open a panel / switch a tab so the target exists.
+              const el = document.createElement("div");
+              el.id = "prepared";
+              el.getBoundingClientRect = () => fakeRect(100, 2000, 50, 20); // below the fold
+              (el as HTMLElement & { scrollIntoView: unknown }).scrollIntoView = scrolled;
+              document.body.append(el);
+            },
+          },
+        ],
+      });
+      await tour.start();
+      await tour.next();
+
+      expect(scrolled).toHaveBeenCalledTimes(1);
+      expect(document.querySelector(".tk-tooltip")!.classList.contains("tk-tooltip--center")).toBe(
+        false
+      );
+      tour.destroy();
+    });
 
     it("re-resolves a selector target after the node is replaced (refresh)", async () => {
       const first = document.createElement("div");

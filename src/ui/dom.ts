@@ -69,6 +69,30 @@ export function setContent(
   el.innerHTML = sanitize ? sanitize(value) : value;
 }
 
+/**
+ * Text for an attribute such as `aria-label`. With `allowHTML` the value is
+ * markup, and tags must not leak into the accessible name; it is parsed in an
+ * inert document (no script runs, no image loads), never through innerHTML.
+ */
+export function plainText(
+  value: string,
+  allowHTML: boolean,
+  sanitize?: (html: string) => string
+): string {
+  if (!allowHTML) return value;
+  const doc = new DOMParser().parseFromString(sanitize ? sanitize(value) : value, "text/html");
+  return (doc.body.textContent ?? "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Focus is inside an open hint popover — the topmost TourKit layer, which
+ * owns the next Esc. Tours and spotlights let it through, whichever of them
+ * registered its document listener first.
+ */
+export function inHintPopover(el: Element | null): boolean {
+  return el?.closest(".tk-hint-popover") != null;
+}
+
 export function prefersReducedMotion(): boolean {
   return (
     typeof window.matchMedia === "function" &&

@@ -88,7 +88,10 @@ Rails, Django, plain HTML:
 
 For fully declarative pages, mark the elements with `data-tour` attributes and
 call `TourKit.bindTriggers()` once — buttons carrying `data-tour-trigger` then
-start tours with no page-specific JavaScript at all.
+start tours with no page-specific JavaScript at all. A trigger whose group has
+no visible steps (a typo in `data-tour-trigger="..."`, or a tab that is still
+hidden) starts nothing and logs a console warning; it never falls back to the
+rest of the page.
 
 ## Vendoring: copying `dist` into your app
 
@@ -130,7 +133,11 @@ flag. Opt out per instance with `hostClasses: false`.
 
 Keyboard-wise, an `Esc` your page already handled (`event.defaultPrevented`)
 is ignored by the tour, `highlight()` and hint popovers — a dialog opened on
-top of an interactive step closes without ending the tour behind it.
+top of an interactive step closes without ending the tour behind it. TourKit
+plays by the same rule internally: a hint popover consumes the `Esc` that
+closes it, and inside interactive step content (`renderStep` forms, selects,
+ARIA sliders and listboxes) the arrow keys, `Home` and `End` belong to the
+control rather than to tour navigation.
 
 ## Markup that already uses `data-tour`
 

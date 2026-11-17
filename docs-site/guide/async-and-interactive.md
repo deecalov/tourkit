@@ -29,7 +29,9 @@ How it works:
 - The watcher is a `MutationObserver` scoped to the waiting phase only
   (`childList` + `subtree` + `style/class/hidden` attribute changes), so it
   catches both late mounts and "was hidden, now visible" transitions.
-  Mutation bursts are coalesced to one geometry sync per frame.
+  Mutation bursts are coalesced to one geometry sync per frame. A `root`
+  outside `document.body` (an open `ShadowRoot`) is observed directly:
+  subtree observation stops at the shadow boundary in browsers.
 - A connected element with a zero rect (`display: none`) counts as missing —
   the step floats until it actually renders.
 - The engine's transition queue is never blocked: Esc, Next, Back and
@@ -39,6 +41,31 @@ How it works:
   `complete` fires with `reason: "finished"` and `showOnce` is marked, exactly
   as if the user had pressed Done. Use `"float"` there if that is not what you
   want.
+
+## Preparing the DOM: onBeforeShow
+
+When the target only exists after your code acts — a dropdown to open, a tab
+to switch, a view to route to — do it in the step's `onBeforeShow` hook:
+
+```ts
+{
+  target: "#settings-menu .export",
+  content: "Export lives in the settings menu.",
+  onBeforeShow: async () => {
+    await openSettingsMenu(); // may be async; return false to cancel the step
+  },
+  onShown: ({ target }) => track("tour-step", target?.id),
+}
+```
+
+- The target is resolved again after the hook, so the element it mounted or
+  revealed is scrolled to, spotlighted and reported to `onShown` and the
+  `stepChange` event. The hook itself receives the context as it was before
+  it ran (the target may still be `null` there).
+- Returning `false` cancels the navigation; the current step stays. A hook
+  that throws is logged and the step is shown anyway.
+- If the target appears even later than the hook resolves, `waitForTarget`
+  takes over as usual.
 
 ## advanceOn
 
